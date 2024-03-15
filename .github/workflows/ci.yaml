@@ -39,25 +39,14 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
-    # Define any services needed for the test suite (or delete this section)
-    # services:
-    #   postgres:
-    #     image: postgres:16
-    #     ports:
-    #       - "5432:5432"
-    #     env:
-    #       POSTGRES_PASSWORD: secretpassword
     env:
       BATON_LOG_LEVEL: debug
-      # Add any environment variables needed to run baton-baton-vgs
-      # BATON_BASE_URL: 'http://localhost:8080'
-      # BATON_ACCESS_TOKEN: 'secret_token'
-      # The following parameters are passed to grant/revoke commands
       # Change these to the correct IDs for your test data
-      CONNECTOR_GRANT: 'grant:entitlement:group:1234:member:user:9876'
-      CONNECTOR_ENTITLEMENT: 'entitlement:group:1234:member'
-      CONNECTOR_PRINCIPAL: 'user:9876'
-      CONNECTOR_PRINCIPAL_TYPE: 'user'
+      CONNECTOR_GRANT: ''
+      CONNECTOR_ENTITLEMENT: ''
+      CONNECTOR_PRINCIPAL: ''
+      CONNECTOR_PRINCIPAL_TYPE: ''
+      VGS_VAULT: 'tnturck9vro'
     steps:
       - name: Install Go
         uses: actions/setup-go@v4
@@ -65,40 +54,36 @@ jobs:
           go-version: 1.22.x
       - name: Checkout code
         uses: actions/checkout@v3
-      # Install any dependencies here (or delete this)
-      # - name: Install postgres client
-      #   run: sudo apt install postgresql-client
-      # Run any fixture setup here (or delete this)
-      # - name: Import sql into postgres
-      #   run: psql -h localhost --user postgres -f environment.sql
-      #   env:
-      #     PGPASSWORD: secretpassword
       - name: Build baton-baton-vgs
         run: go build ./cmd/baton-baton-vgs
       - name: Run baton-baton-vgs
         run: ./baton-baton-vgs
-
       - name: Install baton
         run: ./scripts/get-baton.sh && mv baton /usr/local/bin
-
+      - name: Get baton resources
+        run: baton resources
       - name: Check for grant before revoking
-
-        run:
-          baton grants --entitlement="${{ env.CONNECTOR_ENTITLEMENT }}" --output-format=json | jq --exit-status ".grants[].principal.id.resource == \"${{ env.CONNECTOR_PRINCIPAL }}\""
-
-
+        if: env.CONNECTOR_ENTITLEMENT != '' && env.CONNECTOR_PRINCIPAL != ''
+        run: |
+          ./baton-vgs --proxyAddr ${{ env.VGS_VAULT }} 
+          baton grants --entitlement ${{ env.CONNECTOR_ENTITLEMENT }} --output-format=json | jq -e ".grants | any(.principal.id.resource ==\"${{ env.CONNECTOR_PRINCIPAL }}\")"
       - name: Revoke grants
-        run: ./baton-baton-vgs --revoke-grant="${{ env.CONNECTOR_GRANT }}"
-
+        if: env.CONNECTOR_GRANT != ''
+        run: |
+          ./baton-vgs --proxyAddr ${{ env.VGS_VAULT }}  
+          ./baton-vgs --proxyAddr ${{ env.VGS_VAULT }} --revoke-grant ${{ env.CONNECTOR_GRANT }}
       - name: Check grant was revoked
-        ./baton-baton-vgs && baton grants --entitlement="${{ env.CONNECTOR_ENTITLEMENT }}" --output-format=json | jq --exit-status "if .grants then .grants[]?.principal.id.resource != \"${{ env.CONNECTOR_PRINCIPAL }}\" else . end"
-
+        if: env.CONNECTOR_ENTITLEMENT != '' && env.CONNECTOR_PRINCIPAL != ''
+        run: |
+           ./baton-vgs --proxyAddr ${{ env.VGS_VAULT }}
+           baton grants --entitlement ${{ env.CONNECTOR_ENTITLEMENT }} --output-format=json | jq -e ".grants | any(.principal.id.resource !=\"${{ env.CONNECTOR_PRINCIPAL }}\")"
       - name: Grant entitlement
-        # Change the grant arguments to the correct IDs for your test data
-        run: ./baton-baton-vgs --grant-entitlement="${{ env.CONNECTOR_ENTITLEMENT }}" --grant-principal="${{ env.CONNECTOR_PRINCIPAL }}" --grant-principal-type="${{ env.CONNECTOR_PRINCIPAL_TYPE }}"
-
+        if: env.CONNECTOR_ENTITLEMENT != '' && env.CONNECTOR_PRINCIPAL != '' && env.CONNECTOR_PRINCIPAL_TYPE != ''
+        run: | 
+          ./baton-vgs --proxyAddr ${{ env.VGS_VAULT }} 
+          ./baton-vgs --proxyAddr ${{ env.VGS_VAULT }} --grant-entitlement ${{ env.CONNECTOR_ENTITLEMENT }} --grant-principal ${{ env.CONNECTOR_PRINCIPAL }} --grant-principal-type ${{ env.CONNECTOR_PRINCIPAL_TYPE }}
       - name: Check grant was re-granted
-
-        run:
-          baton grants --entitlement="${{ env.CONNECTOR_ENTITLEMENT }}" --output-format=json | jq --exit-status ".grants[].principal.id.resource == \"${{ env.CONNECTOR_PRINCIPAL }}\""
-
+        if: env.CONNECTOR_ENTITLEMENT != '' && env.CONNECTOR_PRINCIPAL != ''
+        run: |
+          ./baton-vgs --proxyAddr ${{ env.VGS_VAULT }} 
+          baton grants --entitlement ${{ env.CONNECTOR_ENTITLEMENT }} --output-format=json | jq -e ".grants | any(.principal.id.resource ==\"${{ env.CONNECTOR_PRINCIPAL }}\")"
