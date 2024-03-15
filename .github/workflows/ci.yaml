@@ -57,7 +57,7 @@ jobs:
       - name: Build baton-vgs
         run: go build ./cmd/baton-vgs
       - name: Run baton-vgs
-        run: ./baton-vgs
+        run: ./baton-vgs --vault ${{ env.VGS_VAULT }} 
       - name: Install baton
         run: ./scripts/get-baton.sh && mv baton /usr/local/bin
       - name: Get baton resources
