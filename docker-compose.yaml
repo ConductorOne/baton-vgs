@@ -4,9 +4,9 @@ services:
     image: quay.io/verygoodsecurity/vgs-cli:${VERSION:-latest}
     stdin_open: true
     tty: true
-    environment:
-      VGS_CLIENT_ID: ""
-      VGS_CLIENT_SECRET: ""
+    # environment:
+    #   VGS_CLIENT_ID: ""
+    #   VGS_CLIENT_SECRET: ""
     entrypoint: bash
     env_file:
       - .env
