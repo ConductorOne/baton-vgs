@@ -54,10 +54,10 @@ jobs:
           go-version: 1.22.x
       - name: Checkout code
         uses: actions/checkout@v3
-      - name: Build baton-baton-vgs
-        run: go build ./cmd/baton-baton-vgs
-      - name: Run baton-baton-vgs
-        run: ./baton-baton-vgs
+      - name: Build baton-vgs
+        run: go build ./cmd/baton-vgs
+      - name: Run baton-vgs
+        run: ./baton-vgs
       - name: Install baton
         run: ./scripts/get-baton.sh && mv baton /usr/local/bin
       - name: Get baton resources
