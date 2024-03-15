@@ -65,25 +65,25 @@ jobs:
       - name: Check for grant before revoking
         if: env.CONNECTOR_ENTITLEMENT != '' && env.CONNECTOR_PRINCIPAL != ''
         run: |
-          ./baton-vgs --proxyAddr ${{ env.VGS_VAULT }} 
+          ./baton-vgs --vault ${{ env.VGS_VAULT }} 
           baton grants --entitlement ${{ env.CONNECTOR_ENTITLEMENT }} --output-format=json | jq -e ".grants | any(.principal.id.resource ==\"${{ env.CONNECTOR_PRINCIPAL }}\")"
       - name: Revoke grants
         if: env.CONNECTOR_GRANT != ''
         run: |
-          ./baton-vgs --proxyAddr ${{ env.VGS_VAULT }}  
-          ./baton-vgs --proxyAddr ${{ env.VGS_VAULT }} --revoke-grant ${{ env.CONNECTOR_GRANT }}
+          ./baton-vgs --vault ${{ env.VGS_VAULT }}  
+          ./baton-vgs --vault ${{ env.VGS_VAULT }} --revoke-grant ${{ env.CONNECTOR_GRANT }}
       - name: Check grant was revoked
         if: env.CONNECTOR_ENTITLEMENT != '' && env.CONNECTOR_PRINCIPAL != ''
         run: |
-           ./baton-vgs --proxyAddr ${{ env.VGS_VAULT }}
+           ./baton-vgs --vault ${{ env.VGS_VAULT }}
            baton grants --entitlement ${{ env.CONNECTOR_ENTITLEMENT }} --output-format=json | jq -e ".grants | any(.principal.id.resource !=\"${{ env.CONNECTOR_PRINCIPAL }}\")"
       - name: Grant entitlement
         if: env.CONNECTOR_ENTITLEMENT != '' && env.CONNECTOR_PRINCIPAL != '' && env.CONNECTOR_PRINCIPAL_TYPE != ''
         run: | 
-          ./baton-vgs --proxyAddr ${{ env.VGS_VAULT }} 
-          ./baton-vgs --proxyAddr ${{ env.VGS_VAULT }} --grant-entitlement ${{ env.CONNECTOR_ENTITLEMENT }} --grant-principal ${{ env.CONNECTOR_PRINCIPAL }} --grant-principal-type ${{ env.CONNECTOR_PRINCIPAL_TYPE }}
+          ./baton-vgs --vault ${{ env.VGS_VAULT }} 
+          ./baton-vgs --vault ${{ env.VGS_VAULT }} --grant-entitlement ${{ env.CONNECTOR_ENTITLEMENT }} --grant-principal ${{ env.CONNECTOR_PRINCIPAL }} --grant-principal-type ${{ env.CONNECTOR_PRINCIPAL_TYPE }}
       - name: Check grant was re-granted
         if: env.CONNECTOR_ENTITLEMENT != '' && env.CONNECTOR_PRINCIPAL != ''
         run: |
-          ./baton-vgs --proxyAddr ${{ env.VGS_VAULT }} 
+          ./baton-vgs --vault ${{ env.VGS_VAULT }} 
           baton grants --entitlement ${{ env.CONNECTOR_ENTITLEMENT }} --output-format=json | jq -e ".grants | any(.principal.id.resource ==\"${{ env.CONNECTOR_PRINCIPAL }}\")"
