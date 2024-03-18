@@ -11,12 +11,17 @@ import (
 // config defines the external configuration required for the connector to run.
 type config struct {
 	cli.BaseConfig `mapstructure:",squash"` // Puts the base config options in the same place as the connector options
+	Vault          string                   `mapstructure:"vault"`
 	ClientId       string                   `mapstructure:"clientid"`
 	ClientSecret   string                   `mapstructure:"clientsecret"`
 }
 
 // validateConfig is run after the configuration is loaded, and should return an error if it isn't valid.
 func validateConfig(ctx context.Context, cfg *config) error {
+	if cfg.Vault == "" {
+		return errors.New("vault is required")
+	}
+
 	if cfg.ClientId == "" {
 		return errors.New("clientid is required")
 	}
@@ -30,6 +35,7 @@ func validateConfig(ctx context.Context, cfg *config) error {
 
 // cmdFlags sets the cmdFlags required for the connector.
 func cmdFlags(cmd *cobra.Command) {
-	cmd.PersistentFlags().String("clientid", "", "The VGS client id. ($BATON_VGS_CLIENT_ID)")
-	cmd.PersistentFlags().String("clientsecret", "", "The VGS client secret. ($BATON_VGS_CLIENT_SECRET)")
+	cmd.PersistentFlags().String("vault", "", "The VGS client id. ($BATON_VAULT)")
+	cmd.PersistentFlags().String("clientid", "", "The VGS client id. ($BATON_CLIENT_ID)")
+	cmd.PersistentFlags().String("clientsecret", "", "The VGS client secret. ($BATON_CLIENT_SECRET)")
 }
