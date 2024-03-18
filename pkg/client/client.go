@@ -12,7 +12,6 @@ type VGSClient struct {
 	token JWT
 }
 
-// JWT is a JWT
 type JWT struct {
 	AccessToken      string `json:"access_token,omitempty"`
 	IDToken          string `json:"id_token,omitempty"`
@@ -31,7 +30,7 @@ func New(ctx context.Context, clientId string, clientSecret string) (*VGSClient,
 		client = &http.Client{}
 		jwt    = &JWT{}
 	)
-	req, err := http.NewRequest("POST", "https://auth.verygoodsecurity.com/auth/realms/vgs/protocol/openid-connect/token", body)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, "https://auth.verygoodsecurity.com/auth/realms/vgs/protocol/openid-connect/token", body)
 	if err != nil {
 		return nil, err
 	}
