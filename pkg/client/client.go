@@ -4,31 +4,21 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"io"
 	"net/http"
 	"strings"
 )
 
 type VGSClient struct {
-	token JWT
-}
-
-type JWT struct {
-	AccessToken      string `json:"access_token,omitempty"`
-	IDToken          string `json:"id_token,omitempty"`
-	ExpiresIn        int    `json:"expires_in,omitempty"`
-	RefreshExpiresIn int    `json:"refresh_expires_in,omitempty"`
-	RefreshToken     string `json:"refresh_token,omitempty"`
-	TokenType        string `json:"token_type,omitempty"`
-	NotBeforePolicy  int    `json:"not-before-policy,omitempty"`
-	SessionState     string `json:"session_state,omitempty"`
-	Scope            string `json:"scope,omitempty"`
+	httpClient *http.Client
+	token      *JWT
 }
 
 func New(ctx context.Context, clientId string, clientSecret string) (*VGSClient, error) {
 	var (
-		body   = strings.NewReader(`grant_type=client_credentials`)
-		client = &http.Client{}
-		jwt    = &JWT{}
+		body = strings.NewReader(`grant_type=client_credentials`)
+		cli  = &http.Client{}
+		jwt  = &JWT{}
 	)
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, "https://auth.verygoodsecurity.com/auth/realms/vgs/protocol/openid-connect/token", body)
 	if err != nil {
@@ -37,7 +27,7 @@ func New(ctx context.Context, clientId string, clientSecret string) (*VGSClient,
 
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	req.SetBasicAuth(clientId, clientSecret)
-	resp, err := client.Do(req)
+	resp, err := cli.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +43,8 @@ func New(ctx context.Context, clientId string, clientSecret string) (*VGSClient,
 	}
 
 	vc := VGSClient{
-		token: JWT{
+		httpClient: cli,
+		token: &JWT{
 			AccessToken:      jwt.AccessToken,
 			ExpiresIn:        jwt.ExpiresIn,
 			RefreshExpiresIn: jwt.RefreshExpiresIn,
@@ -68,4 +59,48 @@ func New(ctx context.Context, clientId string, clientSecret string) (*VGSClient,
 
 func (v *VGSClient) GetToken() string {
 	return v.token.AccessToken
+}
+
+func (v *VGSClient) InitHttpClient() {
+	v.httpClient = &http.Client{}
+}
+
+func (v *VGSClient) GetOrganizations(ctx context.Context) ([]Organization, error) {
+	v.InitHttpClient()
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, "https://accounts.apps.verygoodsecurity.com/organizations", nil)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Set("Accept", "application/x-www-form-urlencoded")
+	req.Header.Set("Authorization", "Bearer "+v.GetToken())
+	resp, err := v.httpClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	var organizationsAPIData organizationsAPIData
+	bytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	err = json.Unmarshal(bytes, &organizationsAPIData)
+	if err != nil {
+		return nil, err
+	}
+
+	var organizations []Organization
+	for _, org := range organizationsAPIData.Data {
+		organizations = append(organizations, Organization{
+			Id:        org.Id,
+			Name:      org.Attributes.Name,
+			State:     org.Attributes.State,
+			CreatedAt: org.Attributes.CreatedAt,
+			UpdatedAt: org.Attributes.UpdatedAt,
+		})
+	}
+
+	return organizations, nil
 }
