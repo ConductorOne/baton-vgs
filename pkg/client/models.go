@@ -57,3 +57,28 @@ type organizationAPIAttributes struct {
 	CreatedAt   string   `json:"created_at,omitempty"`
 	UpdatedAt   string   `json:"updated_at,omitempty"`
 }
+
+type organizationUsersAPIData struct {
+	Data []organizationUserAPI `json:"data,omitempty"`
+}
+
+type organizationUserAPI struct {
+	Id         string                        `json:"id,omitempty"`
+	Attributes organizationUserAPIAttributes `json:"attributes,omitempty"`
+}
+
+type organizationUserAPIAttributes struct {
+	Id           string `json:"id,omitempty"`
+	Name         string `json:"name,omitempty"`
+	EmailAddress string `json:"email_address,omitempty"`
+	CreatedAt    string `json:"created_at,omitempty"`
+	UpdatedAt    string `json:"updated_at,omitempty"`
+}
+
+type OrganizationUser struct {
+	Id        string `json:"id"`
+	Name      string `json:"name"`
+	Email     string `json:"email"`
+	CreatedAt string `json:"created_at"`
+	UpdatedAt string `json:"updated_at"`
+}
