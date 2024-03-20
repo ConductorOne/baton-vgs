@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"net/http"
 	"strings"
@@ -122,7 +121,7 @@ func (v *VGSClient) GetOrganizationUsers(ctx context.Context, orgId string) ([]O
 		return nil, err
 	}
 	defer resp.Body.Close()
-	fmt.Println(resp)
+
 	var organizationUsersAPIData organizationUsersAPIData
 	bytes, err := io.ReadAll(resp.Body)
 	if err != nil {
