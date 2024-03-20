@@ -1,6 +1,6 @@
 # `baton-vgs` [![Go Reference](https://pkg.go.dev/badge/github.com/conductorone/baton-vgs.svg)](https://pkg.go.dev/github.com/conductorone/baton-vgs) ![main ci](https://github.com/conductorone/baton-vgs/actions/workflows/main.yaml/badge.svg)
 
-`baton-vgs` is a connector for Very Good Security built using the [Baton SDK](https://github.com/conductorone/baton-sdk). It communicates with the Cloudflare API to sync data about users and access groups in your Very Good Security organization.
+`baton-vgs` is a connector for Very Good Security built using the [Baton SDK](https://github.com/conductorone/baton-sdk). It communicates with the Very Good Security API to sync data about users and access groups in your Very Good Security organization.
 Check out [Baton](https://github.com/conductorone/baton) to learn more about the project in general.
 
 # Getting Started
@@ -8,8 +8,8 @@ Check out [Baton](https://github.com/conductorone/baton) to learn more about the
 ## Prerequisites
 
 - Access to the Very Good Security dashboard.
-- API key. To get the API key log in to the Cloudflare dashboard and go to User Profile -> API Tokens -> View button of Global API Key
-- Email - email used to login to Cloudflare dashboard.
+- API key. To get the API key log in to the Very Good Security dashboard and go to User Profile -> API Tokens -> View button of Global API Key
+- Email - email used to login to Very Good Security dashboard.
 - Account ID
 
 ## brew
