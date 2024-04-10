@@ -1,0 +1,16 @@
+version: '3'
+services:
+  cli:
+    image: quay.io/verygoodsecurity/vgs-cli:${VERSION:-latest}
+    stdin_open: true
+    tty: true
+    # environment:
+    #   VGS_CLIENT_ID: ""
+    #   VGS_CLIENT_SECRET: ""
+    entrypoint: bash
+    env_file:
+      - .env
+    ports:
+      - "127.0.0.1:7745:7745"
+      - "127.0.0.1:8390:8390"
+      - "127.0.0.1:9056:9056"
