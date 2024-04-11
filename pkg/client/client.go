@@ -7,6 +7,9 @@ import (
 	"io"
 	"net/http"
 	"strings"
+
+	"github.com/conductorone/baton-sdk/pkg/uhttp"
+	"github.com/grpc-ecosystem/go-grpc-middleware/logging/zap/ctxzap"
 )
 
 type VGSClient struct {
@@ -15,20 +18,34 @@ type VGSClient struct {
 	endpoint   string
 }
 
+const (
+	applicationJSONHeader     = "application/json"
+	applicationFormUrlencoded = "application/x-www-form-urlencoded"
+)
+
 func New(ctx context.Context, clientId string, clientSecret string) (*VGSClient, error) {
 	var (
 		body = strings.NewReader(`grant_type=client_credentials`)
 		cli  = &http.Client{}
 		jwt  = &JWT{}
 	)
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, "https://auth.verygoodsecurity.com/auth/realms/vgs/protocol/openid-connect/token", body)
+
+	httpClient, err := uhttp.NewClient(ctx, uhttp.WithLogger(true, ctxzap.Extract(ctx)))
 	if err != nil {
 		return nil, err
 	}
 
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	url := "https://auth.verygoodsecurity.com/auth/realms/vgs/protocol/openid-connect/token"
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Accept", applicationJSONHeader)
+	req.Header.Add("Content-Type", applicationFormUrlencoded)
 	req.SetBasicAuth(clientId, clientSecret)
-	resp, err := cli.Do(req)
+
+	resp, err := httpClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
