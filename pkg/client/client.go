@@ -30,7 +30,7 @@ func New(ctx context.Context, clientId string, clientSecret string) (*VGSClient,
 		jwt  = &JWT{}
 	)
 
-	uHttpClient, err := uhttp.NewClient(ctx, uhttp.WithLogger(true, ctxzap.Extract(ctx)))
+	uhttpClient, err := uhttp.NewClient(ctx, uhttp.WithLogger(true, ctxzap.Extract(ctx)))
 	if err != nil {
 		return nil, err
 	}
@@ -44,7 +44,7 @@ func New(ctx context.Context, clientId string, clientSecret string) (*VGSClient,
 	req.Header.Add("Accept", applicationFormUrlencoded)
 	req.Header.Add("Content-Type", applicationFormUrlencoded)
 	req.SetBasicAuth(clientId, clientSecret)
-	resp, err := uHttpClient.Do(req)
+	resp, err := uhttpClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -60,7 +60,7 @@ func New(ctx context.Context, clientId string, clientSecret string) (*VGSClient,
 	}
 
 	vc := VGSClient{
-		httpClient: uHttpClient,
+		httpClient: uhttpClient,
 		token: &JWT{
 			AccessToken:      jwt.AccessToken,
 			ExpiresIn:        jwt.ExpiresIn,
