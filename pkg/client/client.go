@@ -6,6 +6,7 @@ import (
 	"errors"
 	"io"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"github.com/conductorone/baton-sdk/pkg/uhttp"
@@ -26,11 +27,10 @@ const (
 func New(ctx context.Context, clientId string, clientSecret string) (*VGSClient, error) {
 	var (
 		body = strings.NewReader(`grant_type=client_credentials`)
-		cli  = &http.Client{}
 		jwt  = &JWT{}
 	)
 
-	httpClient, err := uhttp.NewClient(ctx, uhttp.WithLogger(true, ctxzap.Extract(ctx)))
+	uHttpClient, err := uhttp.NewClient(ctx, uhttp.WithLogger(true, ctxzap.Extract(ctx)))
 	if err != nil {
 		return nil, err
 	}
@@ -41,11 +41,10 @@ func New(ctx context.Context, clientId string, clientSecret string) (*VGSClient,
 		return nil, err
 	}
 
-	req.Header.Add("Accept", applicationJSONHeader)
+	req.Header.Add("Accept", applicationFormUrlencoded)
 	req.Header.Add("Content-Type", applicationFormUrlencoded)
 	req.SetBasicAuth(clientId, clientSecret)
-
-	resp, err := httpClient.Do(req)
+	resp, err := uHttpClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -61,7 +60,7 @@ func New(ctx context.Context, clientId string, clientSecret string) (*VGSClient,
 	}
 
 	vc := VGSClient{
-		httpClient: cli,
+		httpClient: uHttpClient,
 		token: &JWT{
 			AccessToken:      jwt.AccessToken,
 			ExpiresIn:        jwt.ExpiresIn,
@@ -80,25 +79,22 @@ func (v *VGSClient) GetToken() string {
 	return v.token.AccessToken
 }
 
-func (v *VGSClient) InitHttpClient() {
-	v.httpClient = &http.Client{}
-}
-
 func (v *VGSClient) GetOrganizations(ctx context.Context) ([]Organization, error) {
-	v.InitHttpClient()
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, v.endpoint+"/organizations", nil)
+	url, _ := url.JoinPath(v.endpoint, "/organizations")
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	req.Header.Set("Accept", "application/x-www-form-urlencoded")
+	req.Header.Add("Accept", applicationFormUrlencoded)
+	req.Header.Add("Content-Type", applicationFormUrlencoded)
 	req.Header.Set("Authorization", "Bearer "+v.GetToken())
 	resp, err := v.httpClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
 
+	defer resp.Body.Close()
 	var organizationsAPIData organizationsAPIData
 	bytes, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -125,20 +121,21 @@ func (v *VGSClient) GetOrganizations(ctx context.Context) ([]Organization, error
 }
 
 func (v *VGSClient) GetOrganizationUsers(ctx context.Context, orgId string) ([]OrganizationUser, error) {
-	v.InitHttpClient()
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, v.endpoint+"/"+orgId+"/users", nil)
+	url, _ := url.JoinPath(v.endpoint, "/", orgId, "/users")
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	req.Header.Set("Accept", "application/x-www-form-urlencoded")
+	req.Header.Add("Accept", applicationFormUrlencoded)
+	req.Header.Add("Content-Type", applicationFormUrlencoded)
 	req.Header.Set("Authorization", "Bearer "+v.GetToken())
 	resp, err := v.httpClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
 
+	defer resp.Body.Close()
 	var organizationUsersAPIData organizationUsersAPIData
 	bytes, err := io.ReadAll(resp.Body)
 	if err != nil {
