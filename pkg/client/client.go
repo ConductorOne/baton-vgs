@@ -41,7 +41,7 @@ func New(ctx context.Context, clientId string, clientSecret string) (*VGSClient,
 		return nil, err
 	}
 
-	req.Header.Add("Accept", applicationFormUrlencoded)
+	req.Header.Add("Accept", applicationJSONHeader)
 	req.Header.Add("Content-Type", applicationFormUrlencoded)
 	req.SetBasicAuth(clientId, clientSecret)
 	resp, err := uhttpClient.Do(req)
@@ -86,7 +86,7 @@ func (v *VGSClient) GetOrganizations(ctx context.Context) ([]Organization, error
 		return nil, err
 	}
 
-	req.Header.Add("Accept", applicationFormUrlencoded)
+	req.Header.Add("Accept", applicationJSONHeader)
 	req.Header.Add("Content-Type", applicationFormUrlencoded)
 	req.Header.Set("Authorization", "Bearer "+v.GetToken())
 	resp, err := v.httpClient.Do(req)
@@ -127,7 +127,7 @@ func (v *VGSClient) GetOrganizationUsers(ctx context.Context, orgId string) ([]O
 		return nil, err
 	}
 
-	req.Header.Add("Accept", applicationFormUrlencoded)
+	req.Header.Add("Accept", applicationJSONHeader)
 	req.Header.Add("Content-Type", applicationFormUrlencoded)
 	req.Header.Set("Authorization", "Bearer "+v.GetToken())
 	resp, err := v.httpClient.Do(req)
