@@ -30,13 +30,17 @@ func New(ctx context.Context, clientId string, clientSecret string) (*VGSClient,
 		jwt  = &JWT{}
 	)
 
-	uhttpClient, err := uhttp.NewClient(ctx, uhttp.WithLogger(true, ctxzap.Extract(ctx)))
+	httpCli, err := uhttp.NewClient(ctx, uhttp.WithLogger(true, ctxzap.Extract(ctx)))
 	if err != nil {
 		return nil, err
 	}
 
-	url := "https://auth.verygoodsecurity.com/auth/realms/vgs/protocol/openid-connect/token"
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, body)
+	uri, err := url.ParseRequestURI("https://auth.verygoodsecurity.com/auth/realms/vgs/protocol/openid-connect/token")
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, uri.String(), body)
 	if err != nil {
 		return nil, err
 	}
@@ -44,7 +48,7 @@ func New(ctx context.Context, clientId string, clientSecret string) (*VGSClient,
 	req.Header.Add("Accept", applicationJSONHeader)
 	req.Header.Add("Content-Type", applicationFormUrlencoded)
 	req.SetBasicAuth(clientId, clientSecret)
-	resp, err := uhttpClient.Do(req)
+	resp, err := httpCli.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -60,7 +64,7 @@ func New(ctx context.Context, clientId string, clientSecret string) (*VGSClient,
 	}
 
 	vc := VGSClient{
-		httpClient: uhttpClient,
+		httpClient: httpCli,
 		token: &JWT{
 			AccessToken:      jwt.AccessToken,
 			ExpiresIn:        jwt.ExpiresIn,
