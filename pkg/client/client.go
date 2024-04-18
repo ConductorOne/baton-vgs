@@ -5,24 +5,21 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"github.com/conductorone/baton-sdk/pkg/uhttp"
 	"github.com/grpc-ecosystem/go-grpc-middleware/logging/zap/ctxzap"
 )
 
 type VGSClient struct {
-	httpClient *uhttp.BaseHttpClient
-	token      *JWT
-	endpoint   string
+	httpClient      *uhttp.BaseHttpClient
+	token           *JWT
+	serviceEndpoint string
 }
-
-const (
-	applicationJSONHeader     = "application/json"
-	applicationFormUrlencoded = "application/x-www-form-urlencoded"
-)
 
 func WithBody(body string) uhttp.RequestOption {
 	return func() (io.ReadWriter, map[string]string, error) {
@@ -45,6 +42,14 @@ func WithContentTypeFormHeader() uhttp.RequestOption {
 	return func() (io.ReadWriter, map[string]string, error) {
 		return nil, map[string]string{
 			"Content-Type": "application/x-www-form-urlencoded",
+		}, nil
+	}
+}
+
+func WithAcceptVndJSONHeader() uhttp.RequestOption {
+	return func() (io.ReadWriter, map[string]string, error) {
+		return nil, map[string]string{
+			"Accept": "application/vnd.api+json",
 		}, nil
 	}
 }
@@ -99,7 +104,7 @@ func New(ctx context.Context, clientId string, clientSecret string) (*VGSClient,
 			TokenType:        jwt.TokenType,
 			NotBeforePolicy:  jwt.NotBeforePolicy,
 		},
-		endpoint: "https://accounts.apps.verygoodsecurity.com",
+		serviceEndpoint: "https://accounts.apps.verygoodsecurity.com",
 	}
 
 	return &vc, nil
@@ -110,15 +115,28 @@ func (v *VGSClient) GetToken() string {
 }
 
 func (v *VGSClient) GetOrganizations(ctx context.Context) ([]Organization, error) {
-	uri, _ := url.JoinPath(v.endpoint, "/organizations")
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, uri, nil)
+	strUrl, err := url.JoinPath(v.serviceEndpoint, "/organizations")
 	if err != nil {
 		return nil, err
 	}
 
-	req.Header.Add("Accept", applicationJSONHeader)
-	req.Header.Add("Content-Type", applicationFormUrlencoded)
-	req.Header.Set("Authorization", "Bearer "+v.GetToken())
+	uri, err := url.ParseRequestURI(strUrl)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := v.httpClient.NewRequest(
+		ctx,
+		http.MethodPost,
+		uri,
+		uhttp.WithAcceptJSONHeader(),
+		WithContentTypeFormHeader(),
+		uhttp.WithHeader("Authorization", "Bearer "+v.GetToken()),
+	)
+	if err != nil {
+		return nil, err
+	}
+
 	resp, err := v.httpClient.Do(req)
 	if err != nil {
 		return nil, err
@@ -151,15 +169,31 @@ func (v *VGSClient) GetOrganizations(ctx context.Context) ([]Organization, error
 }
 
 func (v *VGSClient) GetOrganizationUsers(ctx context.Context, orgId string) ([]OrganizationUser, error) {
-	url, _ := url.JoinPath(v.endpoint, "/", orgId, "/users")
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	if !strings.Contains(v.token.Scope, "organization-users:read") {
+		return nil, fmt.Errorf("organization-users:read scope not found")
+	}
+
+	strUrl, err := url.JoinPath(v.serviceEndpoint, "/organizations/", orgId, "/members")
 	if err != nil {
 		return nil, err
 	}
 
-	req.Header.Add("Accept", applicationJSONHeader)
-	req.Header.Add("Content-Type", applicationFormUrlencoded)
-	req.Header.Set("Authorization", "Bearer "+v.GetToken())
+	uri, err := url.ParseRequestURI(strUrl)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := v.httpClient.NewRequest(
+		ctx,
+		http.MethodGet,
+		uri,
+		WithAcceptVndJSONHeader(),
+		uhttp.WithHeader("Authorization", "Bearer "+v.GetToken()),
+	)
+	if err != nil {
+		return nil, err
+	}
+
 	resp, err := v.httpClient.Do(req)
 	if err != nil {
 		return nil, err
