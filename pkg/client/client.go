@@ -127,10 +127,9 @@ func (v *VGSClient) GetOrganizations(ctx context.Context) ([]Organization, error
 
 	req, err := v.httpClient.NewRequest(
 		ctx,
-		http.MethodPost,
+		http.MethodGet,
 		uri,
-		uhttp.WithAcceptJSONHeader(),
-		WithContentTypeFormHeader(),
+		WithAcceptVndJSONHeader(),
 		uhttp.WithHeader("Authorization", "Bearer "+v.GetToken()),
 	)
 	if err != nil {
