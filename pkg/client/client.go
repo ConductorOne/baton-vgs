@@ -1,16 +1,15 @@
 package client
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
 	"io"
 	"net/http"
 	"net/url"
-	"strings"
 
 	"github.com/conductorone/baton-sdk/pkg/uhttp"
-	"github.com/grpc-ecosystem/go-grpc-middleware/logging/zap/ctxzap"
 )
 
 type VGSClient struct {
@@ -24,31 +23,57 @@ const (
 	applicationFormUrlencoded = "application/x-www-form-urlencoded"
 )
 
-func New(ctx context.Context, clientId string, clientSecret string) (*VGSClient, error) {
-	var (
-		body = strings.NewReader(`grant_type=client_credentials`)
-		jwt  = &JWT{}
-	)
+func WithBody(body string) uhttp.RequestOption {
+	return func() (io.ReadWriter, map[string]string, error) {
+		var buffer bytes.Buffer
+		_, err := buffer.WriteString(body)
+		if err != nil {
+			return nil, nil, err
+		}
 
-	httpCli, err := uhttp.NewClient(ctx, uhttp.WithLogger(true, ctxzap.Extract(ctx)))
-	if err != nil {
-		return nil, err
+		_, headers, err := WithContentTypeFormHeader()()
+		if err != nil {
+			return nil, nil, err
+		}
+
+		return &buffer, headers, nil
 	}
+}
 
+func WithContentTypeFormHeader() uhttp.RequestOption {
+	return func() (io.ReadWriter, map[string]string, error) {
+		return nil, map[string]string{
+			"Content-Type": "application/x-www-form-urlencoded",
+		}, nil
+	}
+}
+
+func New(ctx context.Context, clientId string, clientSecret string) (*VGSClient, error) {
+	var jwt = &JWT{}
 	uri, err := url.ParseRequestURI("https://auth.verygoodsecurity.com/auth/realms/vgs/protocol/openid-connect/token")
 	if err != nil {
 		return nil, err
 	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, uri.String(), body)
+	httpClient, err := uhttp.NewClient(ctx, uhttp.WithLogger(true, nil))
 	if err != nil {
 		return nil, err
 	}
 
-	req.Header.Add("Accept", applicationJSONHeader)
-	req.Header.Add("Content-Type", applicationFormUrlencoded)
+	cli := uhttp.NewBaseHttpClient(httpClient)
+	req, err := cli.NewRequest(
+		ctx,
+		http.MethodPost,
+		uri,
+		uhttp.WithAcceptJSONHeader(),
+		WithBody(`grant_type=client_credentials`),
+	)
 	req.SetBasicAuth(clientId, clientSecret)
-	resp, err := httpCli.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := cli.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -64,7 +89,7 @@ func New(ctx context.Context, clientId string, clientSecret string) (*VGSClient,
 	}
 
 	vc := VGSClient{
-		httpClient: httpCli,
+		httpClient: httpClient,
 		token: &JWT{
 			AccessToken:      jwt.AccessToken,
 			ExpiresIn:        jwt.ExpiresIn,
