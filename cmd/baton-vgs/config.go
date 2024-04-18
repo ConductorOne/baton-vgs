@@ -24,7 +24,7 @@ func validateConfig(ctx context.Context, cfg *config) error {
 	}
 
 	if cfg.ServiceAccountClientId == "" {
-		return errors.New("service-sccount-client-id is required")
+		return errors.New("service-account-client-id is required")
 	}
 
 	if cfg.ServiceAccountClientSecret == "" {
