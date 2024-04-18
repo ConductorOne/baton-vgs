@@ -10,10 +10,11 @@ import (
 	"net/url"
 
 	"github.com/conductorone/baton-sdk/pkg/uhttp"
+	"github.com/grpc-ecosystem/go-grpc-middleware/logging/zap/ctxzap"
 )
 
 type VGSClient struct {
-	httpClient *http.Client
+	httpClient *uhttp.BaseHttpClient
 	token      *JWT
 	endpoint   string
 }
@@ -55,7 +56,7 @@ func New(ctx context.Context, clientId string, clientSecret string) (*VGSClient,
 		return nil, err
 	}
 
-	httpClient, err := uhttp.NewClient(ctx, uhttp.WithLogger(true, nil))
+	httpClient, err := uhttp.NewClient(ctx, uhttp.WithLogger(true, ctxzap.Extract(ctx)))
 	if err != nil {
 		return nil, err
 	}
@@ -89,7 +90,7 @@ func New(ctx context.Context, clientId string, clientSecret string) (*VGSClient,
 	}
 
 	vc := VGSClient{
-		httpClient: httpClient,
+		httpClient: cli,
 		token: &JWT{
 			AccessToken:      jwt.AccessToken,
 			ExpiresIn:        jwt.ExpiresIn,
@@ -109,8 +110,8 @@ func (v *VGSClient) GetToken() string {
 }
 
 func (v *VGSClient) GetOrganizations(ctx context.Context) ([]Organization, error) {
-	url, _ := url.JoinPath(v.endpoint, "/organizations")
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	uri, _ := url.JoinPath(v.endpoint, "/organizations")
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, uri, nil)
 	if err != nil {
 		return nil, err
 	}
