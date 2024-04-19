@@ -59,7 +59,7 @@ func WithAuthorizationBearerHeader(token string) uhttp.RequestOption {
 	return uhttp.WithHeader("Authorization", "Bearer "+token)
 }
 
-func New(ctx context.Context, clientId, clientSecret, organizationId string) (*VGSClient, error) {
+func New(ctx context.Context, clientId, clientSecret, orgId string) (*VGSClient, error) {
 	var jwt = &JWT{}
 	uri, err := url.ParseRequestURI("https://auth.verygoodsecurity.com/auth/realms/vgs/protocol/openid-connect/token")
 	if err != nil {
@@ -110,7 +110,7 @@ func New(ctx context.Context, clientId, clientSecret, organizationId string) (*V
 			NotBeforePolicy:  jwt.NotBeforePolicy,
 		},
 		serviceEndpoint: "https://accounts.apps.verygoodsecurity.com",
-		organizationId:  organizationId,
+		organizationId:  orgId,
 	}
 
 	return &vc, nil
@@ -124,7 +124,7 @@ func (v *VGSClient) GetOrganizationId() string {
 	return v.organizationId
 }
 
-func (v *VGSClient) GetOrganizations(ctx context.Context) ([]Organization, error) {
+func (v *VGSClient) ListOrganizations(ctx context.Context) ([]Organization, error) {
 	strUrl, err := url.JoinPath(v.serviceEndpoint, "/organizations")
 	if err != nil {
 		return nil, err
