@@ -9,20 +9,12 @@ import (
 	ent "github.com/conductorone/baton-sdk/pkg/types/entitlement"
 	rs "github.com/conductorone/baton-sdk/pkg/types/resource"
 	"github.com/conductorone/baton-vgs/pkg/client"
-	"golang.org/x/text/cases"
-	"golang.org/x/text/language"
 )
 
 func annotationsForUserResourceType() annotations.Annotations {
 	annos := annotations.Annotations{}
 	annos.Update(&v2.SkipEntitlementsAndGrants{})
 	return annos
-}
-
-func titleCase(s string) string {
-	titleCaser := cases.Title(language.English)
-
-	return titleCaser.String(s)
 }
 
 // Populate entitlement options for a 1password resource.
@@ -33,15 +25,6 @@ func PopulateOptions(displayName, permission, resource string) []ent.Entitlement
 		ent.WithDisplayName(fmt.Sprintf("%s %s %s", displayName, resource, permission)),
 	}
 	return options
-}
-
-func v1AnnotationsForResourceType(resourceTypeID string) annotations.Annotations {
-	annos := annotations.Annotations{}
-	annos.Update(&v2.V1Identifier{
-		Id: resourceTypeID,
-	})
-
-	return annos
 }
 
 // splitFullName returns firstName and lastName.

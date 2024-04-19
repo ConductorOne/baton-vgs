@@ -55,6 +55,10 @@ func WithAcceptVndJSONHeader() uhttp.RequestOption {
 	}
 }
 
+func WithAuthorizationBearerHeader(token string) uhttp.RequestOption {
+	return uhttp.WithHeader("Authorization", "Bearer "+token)
+}
+
 func New(ctx context.Context, clientId, clientSecret, organizationId string) (*VGSClient, error) {
 	var jwt = &JWT{}
 	uri, err := url.ParseRequestURI("https://auth.verygoodsecurity.com/auth/realms/vgs/protocol/openid-connect/token")
@@ -136,7 +140,7 @@ func (v *VGSClient) GetOrganizations(ctx context.Context) ([]Organization, error
 		http.MethodGet,
 		uri,
 		WithAcceptVndJSONHeader(),
-		uhttp.WithHeader("Authorization", "Bearer "+v.GetToken()),
+		WithAuthorizationBearerHeader(v.GetToken()),
 	)
 	if err != nil {
 		return nil, err
@@ -193,7 +197,7 @@ func (v *VGSClient) ListUsers(ctx context.Context, orgId string) ([]Organization
 		http.MethodGet,
 		uri,
 		WithAcceptVndJSONHeader(),
-		uhttp.WithHeader("Authorization", "Bearer "+v.GetToken()),
+		WithAuthorizationBearerHeader(v.GetToken()),
 	)
 	if err != nil {
 		return nil, err

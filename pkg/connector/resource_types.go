@@ -11,23 +11,4 @@ var (
 		},
 		Annotations: annotationsForUserResourceType(),
 	}
-	resourceTypeGroup = &v2.ResourceType{
-		Id:          "group",
-		DisplayName: "Group",
-		Traits: []v2.ResourceType_Trait{
-			v2.ResourceType_TRAIT_GROUP,
-		},
-	}
-	resourceTypeOrg = &v2.ResourceType{
-		Id:          "org",
-		DisplayName: "Org",
-		Annotations: v1AnnotationsForResourceType("org"),
-	}
-	resourceTypeRole = &v2.ResourceType{
-		Id:          "role",
-		DisplayName: "Role",
-		Traits: []v2.ResourceType_Trait{
-			v2.ResourceType_TRAIT_ROLE,
-		},
-	}
 )
