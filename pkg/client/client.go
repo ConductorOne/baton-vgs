@@ -19,7 +19,7 @@ type VGSClient struct {
 	httpClient      *uhttp.BaseHttpClient
 	token           *JWT
 	serviceEndpoint string
-	OrganizationId  string
+	organizationId  string
 }
 
 func WithBody(body string) uhttp.RequestOption {
@@ -106,7 +106,7 @@ func New(ctx context.Context, clientId, clientSecret, organizationId string) (*V
 			NotBeforePolicy:  jwt.NotBeforePolicy,
 		},
 		serviceEndpoint: "https://accounts.apps.verygoodsecurity.com",
-		OrganizationId:  organizationId,
+		organizationId:  organizationId,
 	}
 
 	return &vc, nil
@@ -114,6 +114,10 @@ func New(ctx context.Context, clientId, clientSecret, organizationId string) (*V
 
 func (v *VGSClient) GetToken() string {
 	return v.token.AccessToken
+}
+
+func (v *VGSClient) GetOrganizationId() string {
+	return v.organizationId
 }
 
 func (v *VGSClient) GetOrganizations(ctx context.Context) ([]Organization, error) {
