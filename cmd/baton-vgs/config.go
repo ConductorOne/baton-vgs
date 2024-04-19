@@ -14,7 +14,7 @@ type config struct {
 	Vault                        string                   `mapstructure:"vault"`
 	ServiceAccountClientId       string                   `mapstructure:"service-account-client-id"`
 	ServiceAccountClientSecret   string                   `mapstructure:"service-account-client-secret"`
-	ServiceAccountOrganizationId string                   `mapstructure:"serviceorganizationid"`
+	ServiceAccountOrganizationId string                   `mapstructure:"service-account-organization-id"`
 }
 
 // validateConfig is run after the configuration is loaded, and should return an error if it isn't valid.

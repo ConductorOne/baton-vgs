@@ -19,6 +19,7 @@ type VGSClient struct {
 	httpClient      *uhttp.BaseHttpClient
 	token           *JWT
 	serviceEndpoint string
+	OrganizationId  string
 }
 
 func WithBody(body string) uhttp.RequestOption {
@@ -54,7 +55,7 @@ func WithAcceptVndJSONHeader() uhttp.RequestOption {
 	}
 }
 
-func New(ctx context.Context, clientId string, clientSecret string) (*VGSClient, error) {
+func New(ctx context.Context, clientId, clientSecret, organizationId string) (*VGSClient, error) {
 	var jwt = &JWT{}
 	uri, err := url.ParseRequestURI("https://auth.verygoodsecurity.com/auth/realms/vgs/protocol/openid-connect/token")
 	if err != nil {
@@ -105,6 +106,7 @@ func New(ctx context.Context, clientId string, clientSecret string) (*VGSClient,
 			NotBeforePolicy:  jwt.NotBeforePolicy,
 		},
 		serviceEndpoint: "https://accounts.apps.verygoodsecurity.com",
+		OrganizationId:  organizationId,
 	}
 
 	return &vc, nil
@@ -167,7 +169,7 @@ func (v *VGSClient) GetOrganizations(ctx context.Context) ([]Organization, error
 	return organizations, nil
 }
 
-func (v *VGSClient) GetOrganizationUsers(ctx context.Context, orgId string) ([]OrganizationUser, error) {
+func (v *VGSClient) ListUsers(ctx context.Context, orgId string) ([]OrganizationUser, error) {
 	if !strings.Contains(v.token.Scope, "organization-users:read") {
 		return nil, fmt.Errorf("organization-users:read scope not found")
 	}
