@@ -8,23 +8,26 @@ Check out [Baton](https://github.com/conductorone/baton) to learn more about the
 ## Prerequisites
 
 - Access to the Very Good Security dashboard.
-- API key. To get the API key log in to the Very Good Security dashboard and go to User Profile -> API Tokens -> View button of Global API Key
-- Email - email used to login to Very Good Security dashboard.
-- Account ID
+- clientId
+- clientSecret 
+- organizationId
+
+You'll need a Service account for your organization with the scope organization-users:read. To do this, you will need to use the VGS-CLI. You can find more info about it here(https://www.verygoodsecurity.com/docs/vault/developer-tools/cli-and-client-libraries), and specifically how to add a service account here(https://www.verygoodsecurity.com/docs/vgs-cli/service-account/#create). After doing that you will get the clientId and clientSecret for that account.
+
 
 ## brew
 
 ```
 brew install conductorone/baton/baton conductorone/baton/baton-vgs
 
-BATON_ACCOUNT_ID=cloudflareAccountId BATON_API_KEY=cloudflareApiKey BATON_EMAIL=yourEmail baton-vgs
+BATON_SERVICE_ACCOUNT_CLIENT_ID=vgs_clientid BATON_SERVICE_ACCOUNT_CLIENT_SECRET=vgs_clientsecret BATON_ORGANIZATION_ID=vgs_organizationid BATON_VAULT=vgs_vault baton-vgs
 baton resources
 ```
 
 ## docker
 
 ```
-docker run --rm -v $(pwd):/out -e BATON_ACCOUNT_ID=cloudflareAccountId BATON_API_KEY=cloudflareApiKey BATON_EMAIL=yourEmail ghcr.io/conductorone/baton-vgs:latest -f "/out/sync.c1z"
+docker run --rm -v $(pwd):/out -e BATON_SERVICE_ACCOUNT_CLIENT_ID=vgs_clientid BATON_SERVICE_ACCOUNT_CLIENT_SECRET=vgs_clientsecret BATON_ORGANIZATION_ID=vgs_organizationid BATON_VAULT=vgs_vault ghcr.io/conductorone/baton-vgs:latest -f "/out/sync.c1z"
 docker run --rm -v $(pwd):/out ghcr.io/conductorone/baton:latest -f "/out/sync.c1z" resources
 ```
 
@@ -34,7 +37,7 @@ docker run --rm -v $(pwd):/out ghcr.io/conductorone/baton:latest -f "/out/sync.c
 go install github.com/conductorone/baton/cmd/baton@main
 go install github.com/conductorone/baton-vgs/cmd/baton-vgs@main
 
-BATON_ACCOUNT_ID=cloudflareAccountId BATON_API_KEY=cloudflareApiKey BATON_EMAIL=yourEmail baton-vgs
+BATON_SERVICE_ACCOUNT_CLIENT_ID=vgs_clientid BATON_SERVICE_ACCOUNT_CLIENT_SECRET=vgs_clientsecret BATON_ORGANIZATION_ID=vgs_organizationid BATON_VAULT=vgs_vault baton-vgs
 baton resources
 ```
 
@@ -43,7 +46,7 @@ baton resources
 `baton-vgs` will pull down information about the following Very Good Security resources:
 
 - Users
-- Access Groups
+- Organizations
 
 # Contributing, Support and Issues
 
@@ -57,8 +60,8 @@ See [CONTRIBUTING.md](https://github.com/ConductorOne/baton/blob/main/CONTRIBUTI
 baton-vgs
 
 Usage:
-  baton-cloudflare-zero-trust [flags]
-  baton-cloudflare-zero-trust [command]
+  baton-vgs [flags]
+  baton-vgs [command]
 
 Available Commands:
   capabilities       Get connector capabilities
@@ -66,18 +69,18 @@ Available Commands:
   help               Help about any command
 
 Flags:
-      --account-id string      Cloudflare account ID ($BATON_ACCOUNT_ID)
-      --api-key string         Cloudflare API key ($BATON_API_KEY)
-      --api-token string       Cloudflare API token ($BATON_API_TOKEN)
-      --client-id string       The client ID used to authenticate with ConductorOne ($BATON_CLIENT_ID)
-      --client-secret string   The client secret used to authenticate with ConductorOne ($BATON_CLIENT_SECRET)
-      --email string           Cloudflare account email ($BATON_EMAIL)
-  -f, --file string            The path to the c1z file to sync with ($BATON_FILE) (default "sync.c1z")
-  -h, --help                   help for baton-cloudflare-zero-trust
-      --log-format string      The output format for logs: json, console ($BATON_LOG_FORMAT) (default "json")
-      --log-level string       The log level: debug, info, warn, error ($BATON_LOG_LEVEL) (default "info")
-  -p, --provisioning           This must be set in order for provisioning actions to be enabled. ($BATON_PROVISIONING)
-  -v, --version                version for baton-cloudflare-zero-trust
+      --client-id string                       The client ID used to authenticate with ConductorOne ($BATON_CLIENT_ID)
+      --client-secret string                   The client secret used to authenticate with ConductorOne ($BATON_CLIENT_SECRET)
+  -f, --file string                            The path to the c1z file to sync with ($BATON_FILE) (default "sync.c1z")
+  -h, --help                                   help for baton-vgs
+      --log-format string                      The output format for logs: json, console ($BATON_LOG_FORMAT) (default "json")
+      --log-level string                       The log level: debug, info, warn, error ($BATON_LOG_LEVEL) (default "info")
+      --organization-id string                 The VGS organization id. ($BATON_ORGANIZATION_ID)
+  -p, --provisioning                           This must be set in order for provisioning actions to be enabled. ($BATON_PROVISIONING)
+      --service-account-client-id string       The VGS client id. ($BATON_SERVICE_ACCOUNT_CLIENT_ID)
+      --service-account-client-secret string   The VGS client secret. ($BATON_SERVICE_ACCOUNT_CLIENT_SECRET)
+      --vault string                           The VGS vault id. ($BATON_VAULT)
+  -v, --version                                version for baton-vgs
 
-Use "baton-cloudflare-zero-trust [command] --help" for more information about a command.
+Use "baton-vgs [command] --help" for more information about a command.
 ```
