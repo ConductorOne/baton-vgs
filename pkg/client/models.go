@@ -64,21 +64,49 @@ type organizationUsersAPIData struct {
 
 type organizationUserAPI struct {
 	Id         string                        `json:"id,omitempty"`
+	Type       string                        `json:"type,omitempty"`
 	Attributes organizationUserAPIAttributes `json:"attributes,omitempty"`
 }
 
 type organizationUserAPIAttributes struct {
-	Id           string `json:"id,omitempty"`
-	Name         string `json:"name,omitempty"`
-	EmailAddress string `json:"email_address,omitempty"`
-	CreatedAt    string `json:"created_at,omitempty"`
-	UpdatedAt    string `json:"updated_at,omitempty"`
+	CreatedAt    string               `json:"created_at,omitempty"`
+	UpdatedAt    string               `json:"updated_at,omitempty"`
+	Id           string               `json:"id,omitempty"`
+	Name         string               `json:"name,omitempty"`
+	EmailAddress string               `json:"email_address,omitempty"`
+	Permissions  []string             `json:"permissions"`
+	Vaults       []vaultAPIAttributes `json:"vaults"`
+	Role         string               `json:"role"`
+	LastLogin    any                  `json:"last_login"`
+	LastIP       any                  `json:"last_ip"`
+}
+
+type vaultAPIAttributes struct {
+	Id          string   `json:"id,omitempty"`
+	Name        string   `json:"name,omitempty"`
+	Role        string   `json:"role,omitempty"`
+	Environment string   `json:"env_identifier,omitempty"`
+	Identifier  string   `json:"identifier,omitempty"`
+	State       string   `json:"state,omitempty"`
+	Permissions []string `json:"permissions,omitempty"`
+	CreatedAt   string   `json:"created_at,omitempty"`
+	UpdatedAt   string   `json:"updated_at,omitempty"`
 }
 
 type OrganizationUser struct {
 	Id        string `json:"id"`
 	Name      string `json:"name"`
+	Type      string `json:"type"`
 	Email     string `json:"email"`
 	CreatedAt string `json:"created_at"`
 	UpdatedAt string `json:"updated_at"`
+}
+
+type Vault struct {
+	Id          string `json:"id"`
+	Name        string `json:"name"`
+	Environment string `json:"env_identifier"`
+	State       string `json:"state"`
+	CreatedAt   string `json:"created_at"`
+	UpdatedAt   string `json:"updated_at"`
 }

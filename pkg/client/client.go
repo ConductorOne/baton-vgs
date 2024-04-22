@@ -9,17 +9,21 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"slices"
 	"strings"
 
 	"github.com/conductorone/baton-sdk/pkg/uhttp"
 	"github.com/grpc-ecosystem/go-grpc-middleware/logging/zap/ctxzap"
 )
 
+const NOTFOUND = -1
+
 type VGSClient struct {
 	httpClient      *uhttp.BaseHttpClient
 	token           *JWT
 	serviceEndpoint string
 	organizationId  string
+	vaultId         string
 }
 
 func WithBody(body string) uhttp.RequestOption {
@@ -59,7 +63,7 @@ func WithAuthorizationBearerHeader(token string) uhttp.RequestOption {
 	return uhttp.WithHeader("Authorization", "Bearer "+token)
 }
 
-func New(ctx context.Context, clientId, clientSecret, orgId string) (*VGSClient, error) {
+func New(ctx context.Context, clientId, clientSecret, orgId, vaultId string) (*VGSClient, error) {
 	var jwt = &JWT{}
 	uri, err := url.ParseRequestURI("https://auth.verygoodsecurity.com/auth/realms/vgs/protocol/openid-connect/token")
 	if err != nil {
@@ -111,6 +115,7 @@ func New(ctx context.Context, clientId, clientSecret, orgId string) (*VGSClient,
 		},
 		serviceEndpoint: "https://accounts.apps.verygoodsecurity.com",
 		organizationId:  orgId,
+		vaultId:         vaultId,
 	}
 
 	return &vc, nil
@@ -122,6 +127,10 @@ func (v *VGSClient) GetToken() string {
 
 func (v *VGSClient) GetOrganizationId() string {
 	return v.organizationId
+}
+
+func (v *VGSClient) GetVaultId() string {
+	return v.vaultId
 }
 
 func (v *VGSClient) ListOrganizations(ctx context.Context) ([]Organization, error) {
@@ -177,7 +186,7 @@ func (v *VGSClient) ListOrganizations(ctx context.Context) ([]Organization, erro
 	return organizations, nil
 }
 
-func (v *VGSClient) ListUsers(ctx context.Context, orgId string) ([]OrganizationUser, error) {
+func (v *VGSClient) ListUsers(ctx context.Context, orgId, vaultId string) ([]OrganizationUser, error) {
 	if !strings.Contains(v.token.Scope, "organization-users:read") {
 		return nil, fmt.Errorf("organization-users:read scope not found")
 	}
@@ -222,13 +231,18 @@ func (v *VGSClient) ListUsers(ctx context.Context, orgId string) ([]Organization
 
 	var users []OrganizationUser
 	for _, userAPI := range organizationUsersAPIData.Data {
-		users = append(users, OrganizationUser{
-			Id:        userAPI.Id,
-			Name:      userAPI.Attributes.Name,
-			Email:     userAPI.Attributes.EmailAddress,
-			CreatedAt: userAPI.Attributes.CreatedAt,
-			UpdatedAt: userAPI.Attributes.UpdatedAt,
+		idx := slices.IndexFunc(userAPI.Attributes.Vaults, func(c vaultAPIAttributes) bool {
+			return c.Id == vaultId
 		})
+		if idx != NOTFOUND {
+			users = append(users, OrganizationUser{
+				Id:        userAPI.Id,
+				Name:      userAPI.Attributes.Name,
+				Email:     userAPI.Attributes.EmailAddress,
+				CreatedAt: userAPI.Attributes.CreatedAt,
+				UpdatedAt: userAPI.Attributes.UpdatedAt,
+			})
+		}
 	}
 
 	return users, nil

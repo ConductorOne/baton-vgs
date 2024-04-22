@@ -2,6 +2,7 @@ package connector
 
 import (
 	"context"
+	"fmt"
 
 	v2 "github.com/conductorone/baton-sdk/pb/c1/connector/v2"
 	"github.com/conductorone/baton-sdk/pkg/annotations"
@@ -22,9 +23,9 @@ func (u *userResourceType) ResourceType(ctx context.Context) *v2.ResourceType {
 // Users include a UserTrait because they are the 'shape' of a standard user.
 func (u *userResourceType) List(ctx context.Context, parentResourceID *v2.ResourceId, pToken *pagination.Token) ([]*v2.Resource, string, annotations.Annotations, error) {
 	var rv []*v2.Resource
-	users, err := u.client.ListUsers(ctx, u.client.GetOrganizationId())
+	users, err := u.client.ListUsers(ctx, u.client.GetOrganizationId(), u.client.GetVaultId())
 	if err != nil {
-		return nil, "", nil, err
+		return nil, "", nil, fmt.Errorf("vgs-connector: failed to fetch users: %w", err)
 	}
 
 	for _, usr := range users {
