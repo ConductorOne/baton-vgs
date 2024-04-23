@@ -3,7 +3,6 @@ package client
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -16,8 +15,6 @@ import (
 	"github.com/grpc-ecosystem/go-grpc-middleware/logging/zap/ctxzap"
 )
 
-const NOTFOUND = -1
-
 type VGSClient struct {
 	httpClient      *uhttp.BaseHttpClient
 	token           *JWT
@@ -25,6 +22,8 @@ type VGSClient struct {
 	organizationId  string
 	vaultId         string
 }
+
+const NF = -1
 
 func WithBody(body string) uhttp.RequestOption {
 	return func() (io.ReadWriter, map[string]string, error) {
@@ -65,7 +64,7 @@ func WithAuthorizationBearerHeader(token string) uhttp.RequestOption {
 
 func New(ctx context.Context, clientId, clientSecret, orgId, vaultId string) (*VGSClient, error) {
 	var jwt = &JWT{}
-	uri, err := url.ParseRequestURI("https://auth.verygoodsecurity.com/auth/realms/vgs/protocol/openid-connect/token")
+	uri, err := url.Parse("https://auth.verygoodsecurity.com/auth/realms/vgs/protocol/openid-connect/token")
 	if err != nil {
 		return nil, err
 	}
@@ -76,8 +75,7 @@ func New(ctx context.Context, clientId, clientSecret, orgId, vaultId string) (*V
 	}
 
 	cli := uhttp.NewBaseHttpClient(httpClient)
-	req, err := cli.NewRequest(
-		ctx,
+	req, err := cli.NewRequest(ctx,
 		http.MethodPost,
 		uri,
 		uhttp.WithAcceptJSONHeader(),
@@ -88,17 +86,12 @@ func New(ctx context.Context, clientId, clientSecret, orgId, vaultId string) (*V
 		return nil, err
 	}
 
-	resp, err := cli.Do(req)
+	resp, err := cli.Do(req, uhttp.WithJSONResponse(&jwt))
 	if err != nil {
 		return nil, err
 	}
 
 	defer resp.Body.Close()
-	err = json.NewDecoder(resp.Body).Decode(jwt)
-	if err != nil {
-		return nil, err
-	}
-
 	if resp.StatusCode != http.StatusOK {
 		return nil, errors.New("token is not valid")
 	}
@@ -134,18 +127,21 @@ func (v *VGSClient) GetVaultId() string {
 }
 
 func (v *VGSClient) ListOrganizations(ctx context.Context) ([]Organization, error) {
+	var (
+		organizations        []Organization
+		organizationsAPIData organizationsAPIData
+	)
 	strUrl, err := url.JoinPath(v.serviceEndpoint, "/organizations")
 	if err != nil {
 		return nil, err
 	}
 
-	uri, err := url.ParseRequestURI(strUrl)
+	uri, err := url.Parse(strUrl)
 	if err != nil {
 		return nil, err
 	}
 
-	req, err := v.httpClient.NewRequest(
-		ctx,
+	req, err := v.httpClient.NewRequest(ctx,
 		http.MethodGet,
 		uri,
 		WithAcceptVndJSONHeader(),
@@ -155,24 +151,13 @@ func (v *VGSClient) ListOrganizations(ctx context.Context) ([]Organization, erro
 		return nil, err
 	}
 
-	resp, err := v.httpClient.Do(req)
+	resp, err := v.httpClient.Do(req, uhttp.WithJSONResponse(&organizationsAPIData))
 	if err != nil {
 		return nil, err
 	}
 
 	defer resp.Body.Close()
-	var organizationsAPIData organizationsAPIData
-	bytes, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
 
-	err = json.Unmarshal(bytes, &organizationsAPIData)
-	if err != nil {
-		return nil, err
-	}
-
-	var organizations []Organization
 	for _, org := range organizationsAPIData.Data {
 		organizations = append(organizations, Organization{
 			Id:        org.Id,
@@ -187,6 +172,10 @@ func (v *VGSClient) ListOrganizations(ctx context.Context) ([]Organization, erro
 }
 
 func (v *VGSClient) ListUsers(ctx context.Context, orgId, vaultId string) ([]OrganizationUser, error) {
+	var (
+		users                    []OrganizationUser
+		organizationUsersAPIData organizationUsersAPIData
+	)
 	if !strings.Contains(v.token.Scope, "organization-users:read") {
 		return nil, fmt.Errorf("organization-users:read scope not found")
 	}
@@ -196,13 +185,12 @@ func (v *VGSClient) ListUsers(ctx context.Context, orgId, vaultId string) ([]Org
 		return nil, err
 	}
 
-	uri, err := url.ParseRequestURI(strUrl)
+	uri, err := url.Parse(strUrl)
 	if err != nil {
 		return nil, err
 	}
 
-	req, err := v.httpClient.NewRequest(
-		ctx,
+	req, err := v.httpClient.NewRequest(ctx,
 		http.MethodGet,
 		uri,
 		WithAcceptVndJSONHeader(),
@@ -212,29 +200,18 @@ func (v *VGSClient) ListUsers(ctx context.Context, orgId, vaultId string) ([]Org
 		return nil, err
 	}
 
-	resp, err := v.httpClient.Do(req)
+	resp, err := v.httpClient.Do(req, uhttp.WithJSONResponse(&organizationUsersAPIData))
 	if err != nil {
 		return nil, err
 	}
 
 	defer resp.Body.Close()
-	var organizationUsersAPIData organizationUsersAPIData
-	bytes, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	err = json.Unmarshal(bytes, &organizationUsersAPIData)
-	if err != nil {
-		return nil, err
-	}
-
-	var users []OrganizationUser
 	for _, userAPI := range organizationUsersAPIData.Data {
-		idx := slices.IndexFunc(userAPI.Attributes.Vaults, func(c vaultAPIAttributes) bool {
+		isOk := slices.IndexFunc(userAPI.Attributes.Vaults, func(c vaultAPIAttributes) bool {
 			return c.Id == vaultId
 		})
-		if idx != NOTFOUND {
+
+		if isOk != NF {
 			users = append(users, OrganizationUser{
 				Id:        userAPI.Id,
 				Name:      userAPI.Attributes.Name,
@@ -249,6 +226,10 @@ func (v *VGSClient) ListUsers(ctx context.Context, orgId, vaultId string) ([]Org
 }
 
 func (v *VGSClient) ListInvites(ctx context.Context, orgId string) ([]OrganizationUser, error) {
+	var (
+		userInvites                []OrganizationUser
+		organizationInvitesAPIData organizationInvitesAPIData
+	)
 	if !strings.Contains(v.token.Scope, "organization-users:read") {
 		return nil, fmt.Errorf("organization-users:read scope not found")
 	}
@@ -258,13 +239,12 @@ func (v *VGSClient) ListInvites(ctx context.Context, orgId string) ([]Organizati
 		return nil, err
 	}
 
-	uri, err := url.ParseRequestURI(strUrl)
+	uri, err := url.Parse(strUrl)
 	if err != nil {
 		return nil, err
 	}
 
-	req, err := v.httpClient.NewRequest(
-		ctx,
+	req, err := v.httpClient.NewRequest(ctx,
 		http.MethodGet,
 		uri,
 		WithAcceptVndJSONHeader(),
@@ -274,27 +254,15 @@ func (v *VGSClient) ListInvites(ctx context.Context, orgId string) ([]Organizati
 		return nil, err
 	}
 
-	resp, err := v.httpClient.Do(req)
+	resp, err := v.httpClient.Do(req, uhttp.WithJSONResponse(&organizationInvitesAPIData))
 	if err != nil {
 		return nil, err
 	}
 
 	defer resp.Body.Close()
-	var organizationInvitesAPIData organizationInvitesAPIData
-	bytes, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	err = json.Unmarshal(bytes, &organizationInvitesAPIData)
-	if err != nil {
-		return nil, err
-	}
-
-	var users []OrganizationUser
 	for _, inviteAPI := range organizationInvitesAPIData.Data {
 		if inviteAPI.Attributes.InviteStatus != "EXPIRED" {
-			users = append(users, OrganizationUser{
+			userInvites = append(userInvites, OrganizationUser{
 				Id:        inviteAPI.Attributes.InviteId,
 				Name:      inviteAPI.Attributes.InvitedBy,
 				Email:     inviteAPI.Attributes.UserEmail,
@@ -303,5 +271,5 @@ func (v *VGSClient) ListInvites(ctx context.Context, orgId string) ([]Organizati
 		}
 	}
 
-	return users, nil
+	return userInvites, nil
 }

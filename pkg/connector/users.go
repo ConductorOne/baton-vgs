@@ -34,7 +34,7 @@ func (u *userResourceType) List(ctx context.Context, parentResourceID *v2.Resour
 	if b.Current() == nil {
 		// Push onto stack in reverse
 		b.Push(pagination.PageState{
-			ResourceTypeID: "invite",
+			ResourceTypeID: "invites",
 		})
 		b.Push(pagination.PageState{
 			ResourceTypeID: "users",
@@ -62,7 +62,7 @@ func (u *userResourceType) List(ctx context.Context, parentResourceID *v2.Resour
 		if err != nil {
 			return nil, "", nil, err
 		}
-	case "invite":
+	case "invites":
 		userInvites, err := u.client.ListInvites(ctx, u.client.GetOrganizationId())
 		if err != nil {
 			return nil, "", nil, fmt.Errorf("vgs-connector: failed to fetch invites: %w", err)
