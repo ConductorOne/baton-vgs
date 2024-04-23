@@ -60,7 +60,7 @@ func splitFullName(name string) (string, string) {
 	return firstName, lastName
 }
 
-func getUserResource(user *client.OrganizationUser) (*v2.Resource, error) {
+func getUserResource(user *client.OrganizationUser, parentResourceID *v2.ResourceId) (*v2.Resource, error) {
 	var userStatus v2.UserTrait_Status_Status = v2.UserTrait_Status_STATUS_ENABLED
 	firstName, lastName := splitFullName(user.Name)
 	profile := map[string]interface{}{
@@ -82,7 +82,12 @@ func getUserResource(user *client.OrganizationUser) (*v2.Resource, error) {
 		displayName = user.Email
 	}
 
-	ret, err := rs.NewUserResource(displayName, resourceTypeUser, user.Id, userTraits)
+	ret, err := rs.NewUserResource(
+		displayName,
+		resourceTypeUser,
+		user.Id,
+		userTraits,
+		rs.WithParentResourceID(parentResourceID))
 	if err != nil {
 		return nil, err
 	}

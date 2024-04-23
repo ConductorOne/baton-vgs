@@ -247,3 +247,61 @@ func (v *VGSClient) ListUsers(ctx context.Context, orgId, vaultId string) ([]Org
 
 	return users, nil
 }
+
+func (v *VGSClient) ListInvites(ctx context.Context, orgId string) ([]OrganizationUser, error) {
+	if !strings.Contains(v.token.Scope, "organization-users:read") {
+		return nil, fmt.Errorf("organization-users:read scope not found")
+	}
+
+	strUrl, err := url.JoinPath(v.serviceEndpoint, "/organizations/", orgId, "/invites")
+	if err != nil {
+		return nil, err
+	}
+
+	uri, err := url.ParseRequestURI(strUrl)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := v.httpClient.NewRequest(
+		ctx,
+		http.MethodGet,
+		uri,
+		WithAcceptVndJSONHeader(),
+		WithAuthorizationBearerHeader(v.GetToken()),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := v.httpClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+	var organizationInvitesAPIData organizationInvitesAPIData
+	bytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	err = json.Unmarshal(bytes, &organizationInvitesAPIData)
+	if err != nil {
+		return nil, err
+	}
+
+	var users []OrganizationUser
+	for _, inviteAPI := range organizationInvitesAPIData.Data {
+		if inviteAPI.Attributes.InviteStatus != "EXPIRED" {
+			users = append(users, OrganizationUser{
+				Id:        inviteAPI.Attributes.InviteId,
+				Name:      inviteAPI.Attributes.InvitedBy,
+				Email:     inviteAPI.Attributes.UserEmail,
+				CreatedAt: inviteAPI.Attributes.CreatedAt,
+			})
+		}
+	}
+
+	return users, nil
+}
