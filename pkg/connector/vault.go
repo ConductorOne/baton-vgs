@@ -21,7 +21,7 @@ func (v *vaultResourceType) ResourceType(_ context.Context) *v2.ResourceType {
 	return v.resourceType
 }
 
-// List returns all the organizations from the database as resource objects.
+// List returns all the vaults from the database as resource objects.
 func (v *vaultResourceType) List(ctx context.Context, parentResourceID *v2.ResourceId, pToken *pagination.Token) ([]*v2.Resource, string, annotations.Annotations, error) {
 	var ret []*v2.Resource
 	vaults, err := v.client.ListVaults(ctx)
@@ -30,7 +30,7 @@ func (v *vaultResourceType) List(ctx context.Context, parentResourceID *v2.Resou
 	}
 
 	for _, vault := range vaults {
-		orgResource, err := rs.NewResource(
+		vaultResource, err := rs.NewResource(
 			vault.Name,
 			resourceTypeVault,
 			vault.Id,
@@ -46,7 +46,7 @@ func (v *vaultResourceType) List(ctx context.Context, parentResourceID *v2.Resou
 			return nil, "", nil, err
 		}
 
-		ret = append(ret, orgResource)
+		ret = append(ret, vaultResource)
 	}
 
 	return ret, "", nil, nil
@@ -56,12 +56,12 @@ func (v *vaultResourceType) Entitlements(_ context.Context, resource *v2.Resourc
 	rv := make([]*v2.Entitlement, 0, len(orgAccessLevels))
 	for _, level := range orgAccessLevels {
 		rv = append(rv, ent.NewPermissionEntitlement(resource, level,
-			ent.WithDisplayName(fmt.Sprintf("%s Organization %s", resource.DisplayName, titleCase(level))),
-			ent.WithDescription(fmt.Sprintf("Access to %s organization in VGS", resource.DisplayName)),
+			ent.WithDisplayName(fmt.Sprintf("%s Vault %s", resource.DisplayName, titleCase(level))),
+			ent.WithDescription(fmt.Sprintf("Access to %s vault in VGS", resource.DisplayName)),
 			ent.WithAnnotation(&v2.V1Identifier{
-				Id: fmt.Sprintf("org:%s:role:%s", resource.Id.Resource, level),
+				Id: fmt.Sprintf("vault:%s:role:%s", resource.Id.Resource, level),
 			}),
-			ent.WithGrantableTo(resourceTypeUser),
+			ent.WithGrantableTo(resourceTypeVault),
 		))
 	}
 
