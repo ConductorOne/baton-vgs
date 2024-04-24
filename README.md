@@ -50,10 +50,11 @@ baton resources
 
 # Data Model
 
-`baton-vgs` will pull down information about the following Very Good Security resources:
+`baton-vgs` will pull down information about the following VGS resources:
 
 - Users
 - Organizations
+- Vaults
 
 # Contributing, Support and Issues
 
