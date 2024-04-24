@@ -20,7 +20,7 @@ For simplicity, just run the following script.
 vgs apply service-account -O <ORG_ID> -f ./pkg/config/service_account.yaml
 ```
 
-It will create a service account for you. Then you can use the clientId and clientSecret provided by runnig the script.  
+It will create a service account for you. Then you can use the clientId and clientSecret provided by running the script.  
 
 ## brew
 
