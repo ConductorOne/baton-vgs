@@ -16,4 +16,9 @@ var (
 		DisplayName: "Org",
 		Annotations: v1AnnotationsForResourceType("org"),
 	}
+	resourceTypeVault = &v2.ResourceType{
+		Id:          "vault",
+		DisplayName: "Vault",
+		Annotations: v1AnnotationsForResourceType("vault"),
+	}
 )

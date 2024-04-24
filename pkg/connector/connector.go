@@ -19,6 +19,7 @@ func (d *Connector) ResourceSyncers(ctx context.Context) []connectorbuilder.Reso
 	return []connectorbuilder.ResourceSyncer{
 		userBuilder(d.client),
 		orgBuilder(d.client),
+		vaultBuilder(d.client),
 	}
 }
 
@@ -32,7 +33,7 @@ func (d *Connector) Asset(ctx context.Context, asset *v2.AssetRef) (string, io.R
 func (d *Connector) Metadata(ctx context.Context) (*v2.ConnectorMetadata, error) {
 	return &v2.ConnectorMetadata{
 		DisplayName: "VGS Connector",
-		Description: "Connector syncing users, organizations and roles from VGS..",
+		Description: "Connector syncing users, organizations from VGS..",
 	}, nil
 }
 

@@ -167,7 +167,6 @@ func (v *VGSClient) ListOrganizations(ctx context.Context) ([]Organization, erro
 	}
 
 	defer resp.Body.Close()
-
 	for _, org := range organizationsAPIData.Data {
 		organizations = append(organizations, Organization{
 			Id:        org.Id,
@@ -328,4 +327,48 @@ func (v *VGSClient) ListVaultUsers(ctx context.Context, vaultId string) ([]Organ
 	}
 
 	return vaultUsers, nil
+}
+
+func (v *VGSClient) ListVaults(ctx context.Context) ([]Vault, error) {
+	var (
+		vaults                    []Vault
+		organizationVaultsAPIData organizationVaultsAPIData
+	)
+	strUrl, err := url.JoinPath(v.serviceEndpoint, "/vaults")
+	if err != nil {
+		return nil, err
+	}
+
+	uri, err := url.Parse(strUrl)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := v.httpClient.NewRequest(ctx,
+		http.MethodGet,
+		uri,
+		WithAcceptVndJSONHeader(),
+		WithAuthorizationBearerHeader(v.GetToken()),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := v.httpClient.Do(req, uhttp.WithJSONResponse(&organizationVaultsAPIData))
+	if err != nil {
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+	for _, vault := range organizationVaultsAPIData.Data {
+		vaults = append(vaults, Vault{
+			Id:          vault.Id,
+			Name:        vault.Attributes.Name,
+			Environment: vault.Attributes.Environment,
+			CreatedAt:   vault.Attributes.CreatedAt,
+			UpdatedAt:   vault.Attributes.UpdatedAt,
+		})
+	}
+
+	return vaults, nil
 }
