@@ -9,7 +9,7 @@ You'll need a Service account for your organization with the scope organization-
 
 ## Prerequisites
 
-- Access to the VGS dashboard(https://dashboard.verygoodsecurity.com/).
+- Access to the VGS [dashboard](https://dashboard.verygoodsecurity.com/).
 - clientId
 - clientSecret 
 - organizationId
