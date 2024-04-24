@@ -66,6 +66,10 @@ type organizationInvitesAPIData struct {
 	Data []organizationInviteAPI `json:"data,omitempty"`
 }
 
+type vaultUsersAPIData struct {
+	Data []vaultUserAPI `json:"data,omitempty"`
+}
+
 type organizationUserAPI struct {
 	Id         string                        `json:"id,omitempty"`
 	Type       string                        `json:"type,omitempty"`
@@ -76,6 +80,18 @@ type organizationInviteAPI struct {
 	Id         string                          `json:"id,omitempty"`
 	Type       string                          `json:"type,omitempty"`
 	Attributes organizationInviteAPIAttributes `json:"attributes,omitempty"`
+}
+
+type vaultUserAPI struct {
+	Id         string                 `json:"id,omitempty"`
+	Type       string                 `json:"type,omitempty"`
+	Attributes vaultUserAPIAttributes `json:"attributes,omitempty"`
+}
+
+type vaultUserAPIAttributes struct {
+	Id    string `json:"id,omitempty"`
+	Email string `json:"email,omitempty"`
+	Role  string `json:"role"`
 }
 
 type organizationUserAPIAttributes struct {

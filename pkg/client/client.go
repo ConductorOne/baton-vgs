@@ -273,3 +273,49 @@ func (v *VGSClient) ListInvites(ctx context.Context, orgId string) ([]Organizati
 
 	return userInvites, nil
 }
+
+func (v *VGSClient) ListVaultUsers(ctx context.Context, vaultId string) ([]OrganizationUser, error) {
+	var (
+		vaultUsers        []OrganizationUser
+		vaultUsersAPIData vaultUsersAPIData
+	)
+	if !strings.Contains(v.token.Scope, "organization-users:read") {
+		return nil, fmt.Errorf("organization-users:read scope not found")
+	}
+
+	strUrl, err := url.JoinPath(v.serviceEndpoint, "/vaults/", vaultId, "/members")
+	if err != nil {
+		return nil, err
+	}
+
+	uri, err := url.Parse(strUrl)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := v.httpClient.NewRequest(ctx,
+		http.MethodGet,
+		uri,
+		WithAcceptVndJSONHeader(),
+		WithAuthorizationBearerHeader(v.GetToken()),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := v.httpClient.Do(req, uhttp.WithJSONResponse(&vaultUsersAPIData))
+	if err != nil {
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+	for _, vaultUserAPI := range vaultUsersAPIData.Data {
+		vaultUsers = append(vaultUsers, OrganizationUser{
+			Id:    vaultUserAPI.Id,
+			Name:  vaultUserAPI.Attributes.Email,
+			Email: vaultUserAPI.Attributes.Email,
+		})
+	}
+
+	return vaultUsers, nil
+}
