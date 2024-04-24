@@ -75,9 +75,38 @@ type vaultUsersAPIData struct {
 }
 
 type organizationVaultAPI struct {
-	Id         string                         `json:"id,omitempty"`
-	Type       string                         `json:"type,omitempty"`
-	Attributes organizationVaultAPIAttributes `json:"attributes,omitempty"`
+	Id            string                         `json:"id,omitempty"`
+	Type          string                         `json:"type,omitempty"`
+	Attributes    organizationVaultAPIAttributes `json:"attributes,omitempty"`
+	Relationships vaultAPIRelationships          `json:"relationships,omitempty"`
+	Links         vaultAPILinks                  `json:"links,omitempty"`
+}
+
+type vaultAPILinks struct {
+	Self               string `json:"self,omitempty"`
+	ReverseProxy       string `json:"reverse_proxy,omitempty"`
+	ForwardProxy       string `json:"forward_proxy,omitempty"`
+	VaultManagementApi string `json:"vault_management_api,omitempty"`
+	VaultApi           string `json:"vault_api,omitempty"`
+}
+
+type vaultAPIRelationships struct {
+	Organization organizationRelationshipsAPIData `json:"organization,omitempty"`
+}
+
+type organizationRelationshipsAPIData struct {
+	Links Links `json:"links,omitempty"`
+	Data  Data  `json:"data,omitempty"`
+}
+
+type Data struct {
+	Id   string `json:"id,omitempty"`
+	Type string `json:"type,omitempty"`
+}
+
+type Links struct {
+	Self    string `json:"self,omitempty"`
+	Related string `json:"related,omitempty"`
 }
 
 type organizationInviteAPI struct {

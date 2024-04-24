@@ -331,7 +331,7 @@ func (v *VGSClient) ListVaultUsers(ctx context.Context, vaultId string) ([]Organ
 
 func (v *VGSClient) ListVaults(ctx context.Context) ([]Vault, error) {
 	var (
-		vaults                    []Vault
+		organizationVaults        []Vault
 		organizationVaultsAPIData organizationVaultsAPIData
 	)
 	strUrl, err := url.JoinPath(v.serviceEndpoint, "/vaults")
@@ -361,7 +361,7 @@ func (v *VGSClient) ListVaults(ctx context.Context) ([]Vault, error) {
 
 	defer resp.Body.Close()
 	for _, vault := range organizationVaultsAPIData.Data {
-		vaults = append(vaults, Vault{
+		organizationVaults = append(organizationVaults, Vault{
 			Id:          vault.Id,
 			Name:        vault.Attributes.Name,
 			Environment: vault.Attributes.Environment,
@@ -370,5 +370,5 @@ func (v *VGSClient) ListVaults(ctx context.Context) ([]Vault, error) {
 		})
 	}
 
-	return vaults, nil
+	return organizationVaults, nil
 }
