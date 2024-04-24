@@ -3,6 +3,7 @@ package client
 import (
 	"bytes"
 	"context"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"io"
@@ -62,6 +63,15 @@ func WithAuthorizationBearerHeader(token string) uhttp.RequestOption {
 	return uhttp.WithHeader("Authorization", "Bearer "+token)
 }
 
+func basicAuth(username, password string) string {
+	auth := username + ":" + password
+	return base64.StdEncoding.EncodeToString([]byte(auth))
+}
+
+func WithSetBasicAuthHeader(username, password string) uhttp.RequestOption {
+	return uhttp.WithHeader("Authorization", "Basic "+basicAuth(username, password))
+}
+
 func New(ctx context.Context, clientId, clientSecret, orgId, vaultId string) (*VGSClient, error) {
 	var jwt = &JWT{}
 	uri, err := url.Parse("https://auth.verygoodsecurity.com/auth/realms/vgs/protocol/openid-connect/token")
@@ -80,8 +90,8 @@ func New(ctx context.Context, clientId, clientSecret, orgId, vaultId string) (*V
 		uri,
 		uhttp.WithAcceptJSONHeader(),
 		WithBody(`grant_type=client_credentials`),
+		WithSetBasicAuthHeader(clientId, clientSecret),
 	)
-	req.SetBasicAuth(clientId, clientSecret)
 	if err != nil {
 		return nil, err
 	}
@@ -225,7 +235,7 @@ func (v *VGSClient) ListUsers(ctx context.Context, orgId, vaultId string) ([]Org
 	return users, nil
 }
 
-func (v *VGSClient) ListInvites(ctx context.Context, orgId string) ([]OrganizationUser, error) {
+func (v *VGSClient) ListUserInvites(ctx context.Context, orgId string) ([]OrganizationUser, error) {
 	var (
 		userInvites                []OrganizationUser
 		organizationInvitesAPIData organizationInvitesAPIData

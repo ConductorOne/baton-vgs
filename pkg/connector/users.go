@@ -63,7 +63,7 @@ func (u *userResourceType) List(ctx context.Context, parentResourceID *v2.Resour
 			return nil, "", nil, err
 		}
 	case "invites":
-		userInvites, err := u.client.ListInvites(ctx, u.client.GetOrganizationId())
+		userInvites, err := u.client.ListUserInvites(ctx, u.client.GetOrganizationId())
 		if err != nil {
 			return nil, "", nil, fmt.Errorf("vgs-connector: failed to fetch invites: %w", err)
 		}
@@ -77,7 +77,7 @@ func (u *userResourceType) List(ctx context.Context, parentResourceID *v2.Resour
 			rv = append(rv, ur)
 		}
 
-		return rv, "", nil, nil
+		pageToken = ""
 	default:
 		return nil, "", nil, fmt.Errorf("baton-vgs: unknown page state: %s", b.Current().ResourceTypeID)
 	}
