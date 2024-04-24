@@ -11,12 +11,14 @@ Check out [Baton](https://github.com/conductorone/baton) to learn more about the
 - clientId
 - clientSecret 
 - organizationId
+- vault
 
 You'll need a Service account for your organization with the scope organization-users:read. To do this, you will need to use the VGS-CLI. You can find more info about it here(https://www.verygoodsecurity.com/docs/vault/developer-tools/cli-and-client-libraries), and specifically how to add a service account here(https://www.verygoodsecurity.com/docs/vgs-cli/service-account/#create). After doing that you will get the clientId and clientSecret for that account.
 
-... For simplicity, just run the following script. It will create a service account for you.
-then you can use the clientid and clientsecret provided by runnig the script.  
+For simplicity, just run the following script. 
 vgs apply service-account -O <ORG_ID> -f ./pkg/config/service_account.yaml
+
+It will create a service account for you. Then you can use the clientId and clientSecret provided by runnig the script.  
 
 ## brew
 
