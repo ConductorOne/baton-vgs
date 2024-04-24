@@ -37,6 +37,23 @@ type Environment struct {
 	Region     string `json:"region"`
 }
 
+type OrganizationUser struct {
+	Id        string `json:"id"`
+	Name      string `json:"name"`
+	Type      string `json:"type"`
+	Email     string `json:"email"`
+	CreatedAt string `json:"created_at"`
+	UpdatedAt string `json:"updated_at"`
+}
+
+type Vault struct {
+	Id          string `json:"id"`
+	Name        string `json:"name"`
+	Environment string `json:"env_identifier"`
+	CreatedAt   string `json:"created_at"`
+	UpdatedAt   string `json:"updated_at"`
+}
+
 type organizationsAPIData struct {
 	Data []organizationAPI `json:"data,omitempty"`
 }
@@ -71,7 +88,7 @@ type organizationInviteAPI struct {
 
 type organizationAPI struct {
 	Id         string                    `json:"id,omitempty"`
-	OrgType    string                    `json:"type,omitempty"`
+	Type       string                    `json:"type,omitempty"`
 	Attributes organizationAPIAttributes `json:"attributes,omitempty"`
 }
 
@@ -135,6 +152,7 @@ type organizationInviteAPIAttributes struct {
 	Role         string               `json:"role"`
 	Vaults       []vaultAPIAttributes `json:"vaults"`
 }
+
 type vaultAPIAttributes struct {
 	Id          string   `json:"id,omitempty"`
 	Name        string   `json:"name,omitempty"`
@@ -145,21 +163,4 @@ type vaultAPIAttributes struct {
 	Permissions []string `json:"permissions,omitempty"`
 	CreatedAt   string   `json:"created_at,omitempty"`
 	UpdatedAt   string   `json:"updated_at,omitempty"`
-}
-
-type OrganizationUser struct {
-	Id        string `json:"id"`
-	Name      string `json:"name"`
-	Type      string `json:"type"`
-	Email     string `json:"email"`
-	CreatedAt string `json:"created_at"`
-	UpdatedAt string `json:"updated_at"`
-}
-
-type Vault struct {
-	Id          string `json:"id"`
-	Name        string `json:"name"`
-	Environment string `json:"env_identifier"`
-	CreatedAt   string `json:"created_at"`
-	UpdatedAt   string `json:"updated_at"`
 }
