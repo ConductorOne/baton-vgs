@@ -5,15 +5,15 @@ Check out [Baton](https://github.com/conductorone/baton) to learn more about the
 
 # Getting Started
 
+You'll need a Service account for your organization with the scope organization-users:read. To do this, you will need to use the VGS-CLI. You can find more info about it here(https://www.verygoodsecurity.com/docs/vgs-cli/getting-started#install), and specifically how to add a service account here(https://www.verygoodsecurity.com/docs/vgs-cli/service-account/#create). After doing that you will get the clientId and clientSecret for that account.
+
 ## Prerequisites
 
-- Access to the Very Good Security dashboard.
+- Access to the VGS dashboard(https://dashboard.verygoodsecurity.com/).
 - clientId
 - clientSecret 
 - organizationId
 - vault
-
-You'll need a Service account for your organization with the scope organization-users:read. To do this, you will need to use the VGS-CLI. You can find more info about it here(https://www.verygoodsecurity.com/docs/vault/developer-tools/cli-and-client-libraries), and specifically how to add a service account here(https://www.verygoodsecurity.com/docs/vgs-cli/service-account/#create). After doing that you will get the clientId and clientSecret for that account.
 
 For simplicity, just run the following script. 
 ```
