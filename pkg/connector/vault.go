@@ -8,6 +8,7 @@ import (
 	"github.com/conductorone/baton-sdk/pkg/annotations"
 	"github.com/conductorone/baton-sdk/pkg/pagination"
 	ent "github.com/conductorone/baton-sdk/pkg/types/entitlement"
+	"github.com/conductorone/baton-sdk/pkg/types/grant"
 	rs "github.com/conductorone/baton-sdk/pkg/types/resource"
 	"github.com/conductorone/baton-vgs/pkg/client"
 )
@@ -79,7 +80,32 @@ func (v *vaultResourceType) Entitlements(_ context.Context, resource *v2.Resourc
 }
 
 func (v *vaultResourceType) Grants(ctx context.Context, resource *v2.Resource, pToken *pagination.Token) ([]*v2.Grant, string, annotations.Annotations, error) {
-	return nil, "", nil, nil
+	var (
+		err error
+		rv  []*v2.Grant
+	)
+	users, err := v.client.ListVaultUsers(ctx, resource.Id.Resource)
+	if err != nil {
+		return nil, "", nil, err
+	}
+
+	for _, usr := range users {
+		userCopy := &client.OrganizationUser{
+			Id:    usr.Attributes.Id,
+			Name:  usr.Attributes.Email,
+			Type:  "users",
+			Email: usr.Attributes.Email,
+		}
+		ur, err := getUserResource(userCopy, resource.Id)
+		if err != nil {
+			return nil, "", nil, fmt.Errorf("error creating vault resource for role %s: %w", resource.Id.Resource, err)
+		}
+
+		gr := grant.NewGrant(resource, usr.Attributes.Role, ur.Id)
+		rv = append(rv, gr)
+	}
+
+	return rv, "", nil, nil
 }
 
 func (v *vaultResourceType) Grant(ctx context.Context, principal *v2.Resource, entitlement *v2.Entitlement) (annotations.Annotations, error) {

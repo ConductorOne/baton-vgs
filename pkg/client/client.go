@@ -283,11 +283,8 @@ func (v *VGSClient) ListUserInvites(ctx context.Context, orgId string) ([]Organi
 	return userInvites, nil
 }
 
-func (v *VGSClient) ListVaultUsers(ctx context.Context, vaultId string) ([]OrganizationUser, error) {
-	var (
-		vaultUsers        []OrganizationUser
-		vaultUsersAPIData vaultUsersAPIData
-	)
+func (v *VGSClient) ListVaultUsers(ctx context.Context, vaultId string) ([]vaultUserAPI, error) {
+	var vaultUsersAPIData vaultUsersAPIData
 	if !strings.Contains(v.token.Scope, "organization-users:read") {
 		return nil, fmt.Errorf("organization-users:read scope not found")
 	}
@@ -318,15 +315,7 @@ func (v *VGSClient) ListVaultUsers(ctx context.Context, vaultId string) ([]Organ
 	}
 
 	defer resp.Body.Close()
-	for _, vaultUserAPI := range vaultUsersAPIData.Data {
-		vaultUsers = append(vaultUsers, OrganizationUser{
-			Id:    vaultUserAPI.Attributes.Id,
-			Name:  vaultUserAPI.Attributes.Email,
-			Email: vaultUserAPI.Attributes.Email,
-		})
-	}
-
-	return vaultUsers, nil
+	return vaultUsersAPIData.Data, nil
 }
 
 func (v *VGSClient) ListVaults(ctx context.Context) ([]Vault, error) {
