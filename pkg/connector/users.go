@@ -57,8 +57,7 @@ func (u *userResourceType) List(ctx context.Context, parentResourceID *v2.Resour
 			rv = append(rv, ur)
 		}
 
-		b.Pop()
-		pageToken, err = marshalSkipToken(len(users), 0, b)
+		pageToken, err = b.NextToken("")
 		if err != nil {
 			return nil, "", nil, err
 		}

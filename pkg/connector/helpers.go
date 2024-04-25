@@ -6,6 +6,7 @@ import (
 
 	v2 "github.com/conductorone/baton-sdk/pb/c1/connector/v2"
 	"github.com/conductorone/baton-sdk/pkg/annotations"
+	"github.com/conductorone/baton-sdk/pkg/pagination"
 	ent "github.com/conductorone/baton-sdk/pkg/types/entitlement"
 	rs "github.com/conductorone/baton-sdk/pkg/types/resource"
 	"github.com/conductorone/baton-vgs/pkg/client"
@@ -93,4 +94,21 @@ func getUserResource(user *client.OrganizationUser, parentResourceID *v2.Resourc
 	}
 
 	return ret, nil
+}
+
+func ParsePageToken(i string, resourceID *v2.ResourceId) (*pagination.Bag, error) {
+	b := &pagination.Bag{}
+	err := b.Unmarshal(i)
+	if err != nil {
+		return nil, err
+	}
+
+	if b.Current() == nil {
+		b.Push(pagination.PageState{
+			ResourceTypeID: resourceID.ResourceType,
+			ResourceID:     resourceID.Resource,
+		})
+	}
+
+	return b, nil
 }
