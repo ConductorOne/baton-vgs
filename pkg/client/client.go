@@ -9,7 +9,6 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"slices"
 	"strings"
 
 	"github.com/conductorone/baton-sdk/pkg/uhttp"
@@ -23,8 +22,6 @@ type VGSClient struct {
 	organizationId  string
 	vaultId         string
 }
-
-const NF = -1
 
 func WithBody(body string) uhttp.RequestOption {
 	return func() (io.ReadWriter, map[string]string, error) {
@@ -216,19 +213,13 @@ func (v *VGSClient) ListUsers(ctx context.Context, orgId, vaultId string) ([]Org
 
 	defer resp.Body.Close()
 	for _, userAPI := range organizationUsersAPIData.Data {
-		isOk := slices.IndexFunc(userAPI.Attributes.Vaults, func(c vaultAPIAttributes) bool {
-			return c.Id == vaultId
+		users = append(users, OrganizationUser{
+			Id:        userAPI.Id,
+			Name:      userAPI.Attributes.Name,
+			Email:     userAPI.Attributes.EmailAddress,
+			CreatedAt: userAPI.Attributes.CreatedAt,
+			UpdatedAt: userAPI.Attributes.UpdatedAt,
 		})
-
-		if isOk != NF {
-			users = append(users, OrganizationUser{
-				Id:        userAPI.Id,
-				Name:      userAPI.Attributes.Name,
-				Email:     userAPI.Attributes.EmailAddress,
-				CreatedAt: userAPI.Attributes.CreatedAt,
-				UpdatedAt: userAPI.Attributes.UpdatedAt,
-			})
-		}
 	}
 
 	return users, nil
