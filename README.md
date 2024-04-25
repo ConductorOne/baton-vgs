@@ -5,9 +5,7 @@ Check out [Baton](https://github.com/conductorone/baton) to learn more about the
 
 # Getting Started
 
-You need an [account](https://auth.verygoodsecurity.com/auth/realms/vgs/login-actions/registration?client_id=dashboard&tab_id=YF82V6yuP04) with VGS. 
-
-Then, You'll need to add a Service account for your organization with the scope `organization-users:read`. To do this, you will need to use the VGS-CLI. You can find more info about it [here](https://www.verygoodsecurity.com/docs/vgs-cli/getting-started#install), and specifically how to add a [service account](https://www.verygoodsecurity.com/docs/vgs-cli/service-account/#create). After doing that you will get the clientId and clientSecret for that account.
+You need an [account](https://auth.verygoodsecurity.com/auth/realms/vgs/login-actions/registration?client_id=dashboard&tab_id=YF82V6yuP04) with VGS. Then, You'll need to add a Service account for your organization with the scope `organization-users:read`. To do this, you will need to use the VGS-CLI. You can find more info about it [here](https://www.verygoodsecurity.com/docs/vgs-cli/getting-started#install), and specifically how to add a [service account](https://www.verygoodsecurity.com/docs/vgs-cli/service-account/#create). After doing that you will get the clientId and clientSecret for that account.
 
 ## Prerequisites
 
