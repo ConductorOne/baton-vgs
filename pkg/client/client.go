@@ -320,7 +320,7 @@ func (v *VGSClient) ListVaultUsers(ctx context.Context, vaultId string) ([]Organ
 	defer resp.Body.Close()
 	for _, vaultUserAPI := range vaultUsersAPIData.Data {
 		vaultUsers = append(vaultUsers, OrganizationUser{
-			Id:    vaultUserAPI.Id,
+			Id:    vaultUserAPI.Attributes.Id,
 			Name:  vaultUserAPI.Attributes.Email,
 			Email: vaultUserAPI.Attributes.Email,
 		})
@@ -362,7 +362,7 @@ func (v *VGSClient) ListVaults(ctx context.Context) ([]Vault, error) {
 	defer resp.Body.Close()
 	for _, vault := range organizationVaultsAPIData.Data {
 		organizationVaults = append(organizationVaults, Vault{
-			Id:          vault.Id,
+			Id:          vault.Attributes.Identifier,
 			Name:        vault.Attributes.Name,
 			Environment: vault.Attributes.Environment,
 			CreatedAt:   vault.Attributes.CreatedAt,

@@ -17,6 +17,16 @@ type vaultResourceType struct {
 	client       *client.VGSClient
 }
 
+const (
+	vaultRoleWrite = "write"
+	vaultRoleAdmin = "admin"
+)
+
+var vaultAccessLevels = []string{
+	vaultRoleWrite,
+	vaultRoleAdmin,
+}
+
 func (v *vaultResourceType) ResourceType(_ context.Context) *v2.ResourceType {
 	return v.resourceType
 }
@@ -53,8 +63,8 @@ func (v *vaultResourceType) List(ctx context.Context, parentResourceID *v2.Resou
 }
 
 func (v *vaultResourceType) Entitlements(_ context.Context, resource *v2.Resource, _ *pagination.Token) ([]*v2.Entitlement, string, annotations.Annotations, error) {
-	rv := make([]*v2.Entitlement, 0, len(orgAccessLevels))
-	for _, level := range orgAccessLevels {
+	rv := make([]*v2.Entitlement, 0, len(vaultAccessLevels))
+	for _, level := range vaultAccessLevels {
 		rv = append(rv, ent.NewPermissionEntitlement(resource, level,
 			ent.WithDisplayName(fmt.Sprintf("%s Vault %s", resource.DisplayName, titleCase(level))),
 			ent.WithDescription(fmt.Sprintf("Access to %s vault in VGS", resource.DisplayName)),
