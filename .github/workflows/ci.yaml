@@ -58,7 +58,7 @@ jobs:
       - name: Build baton-vgs
         run: go build ./cmd/baton-vgs
       - name: Run baton-vgs
-        run: ./baton-vgs --vault ${{ env.VGS_VAULT }} --service-account-client-id ${{ BATON_SERVICE_ACCOUNT_CLIENT_ID }} --service-account-client-secret ${{ BATON_SERVICE_ACCOUNT_CLIENT_SECRET }} --organization-id ${{ env.VGS_ORGANIZATION_ID }}
+        run: ./baton-vgs --vault ${{ env.VGS_VAULT }} --service-account-client-id ${{ secrets.BATON_SERVICE_ACCOUNT_CLIENT_ID }} --service-account-client-secret ${{ secrets.BATON_SERVICE_ACCOUNT_CLIENT_SECRET }} --organization-id ${{ env.VGS_ORGANIZATION_ID }}
       - name: Install baton
         run: ./scripts/get-baton.sh && mv baton /usr/local/bin
       - name: Get baton resources
