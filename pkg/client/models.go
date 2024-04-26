@@ -193,3 +193,15 @@ type vaultAPIAttributes struct {
 	CreatedAt   string   `json:"created_at,omitempty"`
 	UpdatedAt   string   `json:"updated_at,omitempty"`
 }
+
+type BodyAttributes struct {
+	Role string `json:"role"`
+}
+
+type BodyData struct {
+	Attributes BodyAttributes `json:"attributes"`
+}
+
+type Body struct {
+	Data BodyData `json:"data"`
+}

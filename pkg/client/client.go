@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -40,10 +41,35 @@ func WithBody(body string) uhttp.RequestOption {
 	}
 }
 
+func WithJSONBodyV2(body interface{}) uhttp.RequestOption {
+	return func() (io.ReadWriter, map[string]string, error) {
+		buffer := new(bytes.Buffer)
+		err := json.NewEncoder(buffer).Encode(body)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		_, headers, err := WithContentTypeVndHeader()()
+		if err != nil {
+			return nil, nil, err
+		}
+
+		return buffer, headers, nil
+	}
+}
+
 func WithContentTypeFormHeader() uhttp.RequestOption {
 	return func() (io.ReadWriter, map[string]string, error) {
 		return nil, map[string]string{
 			"Content-Type": "application/x-www-form-urlencoded",
+		}, nil
+	}
+}
+
+func WithContentTypeVndHeader() uhttp.RequestOption {
+	return func() (io.ReadWriter, map[string]string, error) {
+		return nil, map[string]string{
+			"Content-Type": "application/vnd.api+json",
 		}, nil
 	}
 }
@@ -351,4 +377,53 @@ func (v *VGSClient) ListVaults(ctx context.Context) ([]Vault, error) {
 	}
 
 	return organizationVaults, nil
+}
+
+func (v *VGSClient) UpdateVault(ctx context.Context, vaultIdentifier, userId, role string) (*http.Response, error) {
+	var (
+		body    Body
+		payload = []byte(fmt.Sprintf(`{"data":{"attributes":{"role":"%s"}}}`, role))
+	)
+	if !strings.Contains(v.token.Scope, "organization-users:write") {
+		return nil, fmt.Errorf("organization-users:write scope not found")
+	}
+
+	strUrl, err := url.JoinPath(v.serviceEndpoint, "/vaults/", vaultIdentifier, "/members/", userId)
+	if err != nil {
+		return nil, err
+	}
+
+	uri, err := url.Parse(strUrl)
+	if err != nil {
+		return nil, err
+	}
+
+	err = json.Unmarshal(payload, &body)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := v.httpClient.NewRequest(ctx,
+		http.MethodPut,
+		uri,
+		WithAcceptVndJSONHeader(),
+		WithAuthorizationBearerHeader(v.GetToken()),
+		WithJSONBodyV2(body),
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := v.httpClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusNoContent {
+		return nil, errors.New("user details not updated")
+	}
+
+	return resp, nil
 }

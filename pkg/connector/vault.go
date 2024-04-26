@@ -3,6 +3,7 @@ package connector
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	v2 "github.com/conductorone/baton-sdk/pb/c1/connector/v2"
 	"github.com/conductorone/baton-sdk/pkg/annotations"
@@ -11,6 +12,8 @@ import (
 	"github.com/conductorone/baton-sdk/pkg/types/grant"
 	rs "github.com/conductorone/baton-sdk/pkg/types/resource"
 	"github.com/conductorone/baton-vgs/pkg/client"
+	"github.com/grpc-ecosystem/go-grpc-middleware/logging/zap/ctxzap"
+	"go.uber.org/zap"
 )
 
 type vaultResourceType struct {
@@ -98,7 +101,7 @@ func (v *vaultResourceType) Grants(ctx context.Context, resource *v2.Resource, p
 		}
 		ur, err := getUserResource(userCopy, resource.Id)
 		if err != nil {
-			return nil, "", nil, fmt.Errorf("error creating vault resource for role %s: %w", resource.Id.Resource, err)
+			return nil, "", nil, fmt.Errorf("error creating user resource for role %s: %w", resource.Id.Resource, err)
 		}
 
 		gr := grant.NewGrant(resource, usr.Attributes.Role, ur.Id)
@@ -109,10 +112,40 @@ func (v *vaultResourceType) Grants(ctx context.Context, resource *v2.Resource, p
 }
 
 func (v *vaultResourceType) Grant(ctx context.Context, principal *v2.Resource, entitlement *v2.Entitlement) (annotations.Annotations, error) {
+	var role string = "wtite"
+	l := ctxzap.Extract(ctx)
+	if principal.Id.ResourceType != resourceTypeUser.Id {
+		l.Warn(
+			"baton-vgs: only users can be granted role membership",
+			zap.String("principal_type", principal.Id.ResourceType),
+			zap.String("principal_id", principal.Id.Resource),
+		)
+		return nil, fmt.Errorf("baton-vgs: only users can be granted role membership")
+	}
+
+	ent := strings.Split(entitlement.Id, ":")
+	if len(ent) == 3 {
+		role = ent[len(ent)-1]
+	}
+
+	_, err := v.client.UpdateVault(ctx,
+		entitlement.Resource.Id.Resource,
+		principal.Id.Resource,
+		role)
+	if err != nil {
+		return nil, err
+	}
+
+	l.Warn("Role Membership has been added.",
+		zap.String("vaultIdentifier", entitlement.Resource.Id.Resource),
+		zap.String("userId", principal.Id.Resource),
+	)
+
 	return nil, nil
 }
 
 func (v *vaultResourceType) Revoke(ctx context.Context, grant *v2.Grant) (annotations.Annotations, error) {
+
 	return nil, nil
 }
 
