@@ -379,28 +379,28 @@ func (v *VGSClient) ListVaults(ctx context.Context) ([]Vault, error) {
 	return organizationVaults, nil
 }
 
-func (v *VGSClient) UpdateVault(ctx context.Context, vaultIdentifier, userId, role string) (*http.Response, error) {
+func (v *VGSClient) UpdateVault(ctx context.Context, vaultIdentifier, userId, role string) error {
 	var (
 		body    Body
 		payload = []byte(fmt.Sprintf(`{"data":{"attributes":{"role":"%s"}}}`, role))
 	)
 	if !strings.Contains(v.token.Scope, "organization-users:write") {
-		return nil, fmt.Errorf("organization-users:write scope not found")
+		return fmt.Errorf("organization-users:write scope not found")
 	}
 
 	strUrl, err := url.JoinPath(v.serviceEndpoint, "/vaults/", vaultIdentifier, "/members/", userId)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	uri, err := url.Parse(strUrl)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	err = json.Unmarshal(payload, &body)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	req, err := v.httpClient.NewRequest(ctx,
@@ -412,18 +412,18 @@ func (v *VGSClient) UpdateVault(ctx context.Context, vaultIdentifier, userId, ro
 	)
 
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	resp, err := v.httpClient.Do(req)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusNoContent {
-		return nil, errors.New("user details not updated")
+		return errors.New("user details not updated")
 	}
 
-	return resp, nil
+	return nil
 }

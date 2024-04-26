@@ -128,7 +128,7 @@ func (v *vaultResourceType) Grant(ctx context.Context, principal *v2.Resource, e
 		role = ent[len(ent)-1]
 	}
 
-	_, err := v.client.UpdateVault(ctx,
+	err := v.client.UpdateVault(ctx,
 		entitlement.Resource.Id.Resource,
 		principal.Id.Resource,
 		role)
@@ -145,7 +145,6 @@ func (v *vaultResourceType) Grant(ctx context.Context, principal *v2.Resource, e
 }
 
 func (v *vaultResourceType) Revoke(ctx context.Context, grant *v2.Grant) (annotations.Annotations, error) {
-
 	return nil, nil
 }
 
