@@ -164,7 +164,7 @@ func (v *VGSClient) ListOrganizations(ctx context.Context) ([]Organization, erro
 		organizations        []Organization
 		organizationsAPIData organizationsAPIData
 	)
-	strUrl, err := url.JoinPath(v.serviceEndpoint, "/organizations")
+	strUrl, err := url.JoinPath(v.serviceEndpoint, "organizations")
 	if err != nil {
 		return nil, err
 	}
@@ -212,7 +212,7 @@ func (v *VGSClient) ListUsers(ctx context.Context, orgId, vaultId string) ([]Org
 		return nil, fmt.Errorf("organization-users:read scope not found")
 	}
 
-	strUrl, err := url.JoinPath(v.serviceEndpoint, "/organizations/", orgId, "/members")
+	strUrl, err := url.JoinPath(v.serviceEndpoint, "organizations", orgId, "members")
 	if err != nil {
 		return nil, err
 	}
@@ -260,7 +260,7 @@ func (v *VGSClient) ListUserInvites(ctx context.Context, orgId string) ([]Organi
 		return nil, fmt.Errorf("organization-users:read scope not found")
 	}
 
-	strUrl, err := url.JoinPath(v.serviceEndpoint, "/organizations/", orgId, "/invites")
+	strUrl, err := url.JoinPath(v.serviceEndpoint, "organizations", orgId, "invites")
 	if err != nil {
 		return nil, err
 	}
@@ -306,7 +306,7 @@ func (v *VGSClient) ListVaultUsers(ctx context.Context, vaultId string) ([]vault
 		return nil, fmt.Errorf("organization-users:read scope not found")
 	}
 
-	strUrl, err := url.JoinPath(v.serviceEndpoint, "/vaults/", vaultId, "/members")
+	strUrl, err := url.JoinPath(v.serviceEndpoint, "vaults", vaultId, "members")
 	if err != nil {
 		return nil, err
 	}
@@ -340,7 +340,7 @@ func (v *VGSClient) ListVaults(ctx context.Context) ([]Vault, error) {
 		organizationVaults        []Vault
 		organizationVaultsAPIData organizationVaultsAPIData
 	)
-	strUrl, err := url.JoinPath(v.serviceEndpoint, "/vaults")
+	strUrl, err := url.JoinPath(v.serviceEndpoint, "vaults")
 	if err != nil {
 		return nil, err
 	}
@@ -388,7 +388,7 @@ func (v *VGSClient) UpdateVault(ctx context.Context, vaultIdentifier, userId, ro
 		return fmt.Errorf("organization-users:write scope not found")
 	}
 
-	strUrl, err := url.JoinPath(v.serviceEndpoint, "/vaults/", vaultIdentifier, "/members/", userId)
+	strUrl, err := url.JoinPath(v.serviceEndpoint, "vaults", vaultIdentifier, "members", userId)
 	if err != nil {
 		return err
 	}

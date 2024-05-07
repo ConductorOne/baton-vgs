@@ -3,7 +3,6 @@ package connector
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	v2 "github.com/conductorone/baton-sdk/pb/c1/connector/v2"
 	"github.com/conductorone/baton-sdk/pkg/annotations"
@@ -112,7 +111,7 @@ func (v *vaultResourceType) Grants(ctx context.Context, resource *v2.Resource, p
 }
 
 func (v *vaultResourceType) Grant(ctx context.Context, principal *v2.Resource, entitlement *v2.Entitlement) (annotations.Annotations, error) {
-	var role string = "wtite"
+	var role string
 	l := ctxzap.Extract(ctx)
 	if principal.Id.ResourceType != resourceTypeUser.Id {
 		l.Warn(
@@ -123,12 +122,13 @@ func (v *vaultResourceType) Grant(ctx context.Context, principal *v2.Resource, e
 		return nil, fmt.Errorf("baton-vgs: only users can be granted role membership")
 	}
 
-	ent := strings.Split(entitlement.Id, ":")
-	if len(ent) == 3 {
-		role = ent[len(ent)-1]
+	_, parts, err := parseEntitlementID(entitlement.Id)
+	if err != nil {
+		return nil, err
 	}
 
-	err := v.client.UpdateVault(ctx,
+	role = parts[len(parts)-1]
+	err = v.client.UpdateVault(ctx,
 		entitlement.Resource.Id.Resource,
 		principal.Id.Resource,
 		role)

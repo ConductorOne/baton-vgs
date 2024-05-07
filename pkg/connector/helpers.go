@@ -112,3 +112,18 @@ func ParsePageToken(i string, resourceID *v2.ResourceId) (*pagination.Bag, error
 
 	return b, nil
 }
+
+func parseEntitlementID(id string) (*v2.ResourceId, []string, error) {
+	parts := strings.Split(id, ":")
+	// Need to be at least 3 parts type:entitlement_id:slug
+	if len(parts) < 3 || len(parts) > 3 {
+		return nil, nil, fmt.Errorf("VGS-connector: invalid resource id")
+	}
+
+	resourceId := &v2.ResourceId{
+		ResourceType: parts[0],
+		Resource:     strings.Join(parts[1:len(parts)-1], ":"),
+	}
+
+	return resourceId, parts, nil
+}
