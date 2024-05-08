@@ -1,0 +1,187 @@
+data:
+- attributes:
+    created_at: '2024-03-14T21:36:14'
+    destination_override_endpoint: https://api.sandbox.verygoodvault.com
+    entries: []
+    host_endpoint: tnt[a-z0-9]+-[a-z0-9-]+.[A-Za-z0-9-]\.sandbox\.verygoodproxy\.com
+    id: 85b31234-b38a-4f89-b824-e5fa6d1c60bc
+    ordinal: null
+    port: 80
+    protocol: http
+    source_endpoint: '*'
+    tags:
+      name: dark-green-cross
+      source: tokenizationCollect
+    updated_at: '2024-03-14T21:36:14'
+  id: 85b31234-b38a-4f89-b824-e5fa6d1c60bc
+  type: rule_chain
+- attributes:
+    created_at: '2024-03-18T04:02:20'
+    destination_override_endpoint: https://echo.apps.verygood.systems
+    entries:
+    - classifiers: {}
+      config:
+        condition: AND
+        expression: null
+        rules:
+        - condition: null
+          expression:
+            field: PathInfo
+            operator: matches
+            type: string
+            values:
+            - /post
+          rules: null
+        - condition: null
+          expression:
+            field: ContentType
+            operator: equals
+            type: string
+            values:
+            - application/json
+          rules: null
+      id: d4e18aac-53f7-4893-9bd5-f5df7e1272d4
+      id_selector: null
+      operation: REDACT
+      operations: null
+      phase: REQUEST
+      public_token_generator: UUID
+      targets:
+      - body
+      token_manager: VOLATILE
+      transformer: JSON_PATH
+      transformer_config:
+      - $.card_cvc
+      transformer_config_map: null
+    - classifiers: {}
+      config:
+        condition: AND
+        expression: null
+        rules:
+        - condition: null
+          expression:
+            field: PathInfo
+            operator: matches
+            type: string
+            values:
+            - /post
+          rules: null
+        - condition: null
+          expression:
+            field: ContentType
+            operator: equals
+            type: string
+            values:
+            - application/json
+          rules: null
+      id: 40cee482-491a-4a5d-9fb3-b8237e53de9b
+      id_selector: null
+      operation: REDACT
+      operations: null
+      phase: REQUEST
+      public_token_generator: UUID
+      targets:
+      - body
+      token_manager: PERSISTENT
+      transformer: JSON_PATH
+      transformer_config:
+      - $.card_number
+      transformer_config_map: null
+    host_endpoint: (.*)\.verygoodproxy\.com
+    id: 27d0340e-6d36-4bfb-b38b-01b116ec3154
+    ordinal: null
+    port: 80
+    protocol: http
+    source_endpoint: '*'
+    tags:
+      name: Guide - Inbound
+      source: Inbound Guide
+    updated_at: '2024-03-18T04:02:20'
+  id: 27d0340e-6d36-4bfb-b38b-01b116ec3154
+  type: rule_chain
+- attributes:
+    created_at: '2024-03-18T04:02:49'
+    destination_override_endpoint: '*'
+    entries:
+    - classifiers: {}
+      config:
+        condition: AND
+        expression: null
+        rules:
+        - condition: null
+          expression:
+            field: PathInfo
+            operator: matches
+            type: string
+            values:
+            - /post
+          rules: null
+        - condition: null
+          expression:
+            field: ContentType
+            operator: equals
+            type: string
+            values:
+            - application/json
+          rules: null
+      id: 57f70c05-fe45-44d0-bc0e-4a75efb8a3be
+      id_selector: null
+      operation: ENRICH
+      operations: null
+      phase: REQUEST
+      public_token_generator: UUID
+      targets:
+      - body
+      token_manager: VOLATILE
+      transformer: JSON_PATH
+      transformer_config:
+      - $.card_cvc
+      transformer_config_map: null
+    - classifiers: {}
+      config:
+        condition: AND
+        expression: null
+        rules:
+        - condition: null
+          expression:
+            field: PathInfo
+            operator: matches
+            type: string
+            values:
+            - /post
+          rules: null
+        - condition: null
+          expression:
+            field: ContentType
+            operator: equals
+            type: string
+            values:
+            - application/json
+          rules: null
+      id: 763d71bd-d4a4-4bff-a383-fce679a3d97e
+      id_selector: null
+      operation: ENRICH
+      operations: null
+      phase: REQUEST
+      public_token_generator: UUID
+      targets:
+      - body
+      token_manager: PERSISTENT
+      transformer: JSON_PATH
+      transformer_config:
+      - $.card_number
+      transformer_config_map: null
+    host_endpoint: echo\.apps\.verygood\.systems
+    id: 66087a6c-f219-4e25-a04c-b9e00af1193f
+    ordinal: null
+    port: 80
+    protocol: http
+    source_endpoint: '*'
+    tags:
+      name: Guide - Outbound
+      source: Outbound Guide
+    updated_at: '2024-03-18T04:02:49'
+  id: 66087a6c-f219-4e25-a04c-b9e00af1193f
+  type: rule_chain
+version: 1
+

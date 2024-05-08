@@ -47,6 +47,7 @@ jobs:
       CONNECTOR_PRINCIPAL: ''
       CONNECTOR_PRINCIPAL_TYPE: ''
       VGS_VAULT: 'tnturck9vro'
+      VGS_ORGANIZATION_ID: 'ACeVfPS9pFLe5izbhMo4rxMV'
     steps:
       - name: Install Go
         uses: actions/setup-go@v4
@@ -56,8 +57,8 @@ jobs:
         uses: actions/checkout@v3
       - name: Build baton-vgs
         run: go build ./cmd/baton-vgs
-      # - name: Run baton-vgs
-      #   run: ./baton-vgs --vault ${{ env.VGS_VAULT }} 
+      - name: Run baton-vgs
+        run: ./baton-vgs --vault ${{ env.VGS_VAULT }} --service-account-client-id ${{ secrets.BATON_SERVICE_ACCOUNT_CLIENT_ID }} --service-account-client-secret ${{ secrets.BATON_SERVICE_ACCOUNT_CLIENT_SECRET }} --organization-id ${{ env.VGS_ORGANIZATION_ID }}
       - name: Install baton
         run: ./scripts/get-baton.sh && mv baton /usr/local/bin
       - name: Get baton resources

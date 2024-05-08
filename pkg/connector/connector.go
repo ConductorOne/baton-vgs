@@ -17,7 +17,9 @@ type Connector struct {
 // ResourceSyncers returns a ResourceSyncer for each resource type that should be synced from the upstream service.
 func (d *Connector) ResourceSyncers(ctx context.Context) []connectorbuilder.ResourceSyncer {
 	return []connectorbuilder.ResourceSyncer{
-		newUserBuilder(),
+		userBuilder(d.client),
+		orgBuilder(d.client),
+		vaultBuilder(d.client),
 	}
 }
 
@@ -31,7 +33,7 @@ func (d *Connector) Asset(ctx context.Context, asset *v2.AssetRef) (string, io.R
 func (d *Connector) Metadata(ctx context.Context) (*v2.ConnectorMetadata, error) {
 	return &v2.ConnectorMetadata{
 		DisplayName: "VGS Connector",
-		Description: "Connector syncing users, organizations and roles from VGS..",
+		Description: "Connector syncing users, organizations and vaults from VGS.",
 	}, nil
 }
 
@@ -42,8 +44,8 @@ func (d *Connector) Validate(ctx context.Context) (annotations.Annotations, erro
 }
 
 // New returns a new instance of the connector.
-func New(ctx context.Context, clientId string, clientSecret string) (*Connector, error) {
-	vc, err := client.New(ctx, clientId, clientSecret)
+func New(ctx context.Context, clientId, clientSecret, organizationId, vaultId string) (*Connector, error) {
+	vc, err := client.New(ctx, clientId, clientSecret, organizationId, vaultId)
 	if err != nil {
 		return nil, err
 	}
