@@ -42,10 +42,10 @@ jobs:
     env:
       BATON_LOG_LEVEL: debug
       # Change these to the correct IDs for your test data
-      CONNECTOR_GRANT: ''
-      CONNECTOR_ENTITLEMENT: ''
-      CONNECTOR_PRINCIPAL: ''
-      CONNECTOR_PRINCIPAL_TYPE: ''
+      CONNECTOR_GRANT: 'vault:tnturck9vro:write:user:IDjSP9BVbJ3RnPr2FonGxXp5'
+      CONNECTOR_ENTITLEMENT: 'vault:tnturck9vro:write'
+      CONNECTOR_PRINCIPAL_TYPE: 'user'
+      CONNECTOR_PRINCIPAL: 'IDjSP9BVbJ3RnPr2FonGxXp5'
       VGS_VAULT: 'tnturck9vro'
       VGS_ORGANIZATION_ID: 'ACeVfPS9pFLe5izbhMo4rxMV'
     steps:
@@ -66,25 +66,25 @@ jobs:
       - name: Check for grant before revoking
         if: env.CONNECTOR_ENTITLEMENT != '' && env.CONNECTOR_PRINCIPAL != ''
         run: |
-          ./baton-vgs --vault ${{ env.VGS_VAULT }} 
+          ./baton-vgs --vault ${{ env.VGS_VAULT }} --service-account-client-id ${{ secrets.BATON_SERVICE_ACCOUNT_CLIENT_ID }} --service-account-client-secret ${{ secrets.BATON_SERVICE_ACCOUNT_CLIENT_SECRET }} --organization-id ${{ env.VGS_ORGANIZATION_ID }}
           baton grants --entitlement ${{ env.CONNECTOR_ENTITLEMENT }} --output-format=json | jq -e ".grants | any(.principal.id.resource ==\"${{ env.CONNECTOR_PRINCIPAL }}\")"
       - name: Revoke grants
         if: env.CONNECTOR_GRANT != ''
         run: |
-          ./baton-vgs --vault ${{ env.VGS_VAULT }}  
-          ./baton-vgs --vault ${{ env.VGS_VAULT }} --revoke-grant ${{ env.CONNECTOR_GRANT }}
+          ./baton-vgs --vault ${{ env.VGS_VAULT }} --service-account-client-id ${{ secrets.BATON_SERVICE_ACCOUNT_CLIENT_ID }} --service-account-client-secret ${{ secrets.BATON_SERVICE_ACCOUNT_CLIENT_SECRET }} --organization-id ${{ env.VGS_ORGANIZATION_ID }}
+          ./baton-vgs --vault ${{ env.VGS_VAULT }} --service-account-client-id ${{ secrets.BATON_SERVICE_ACCOUNT_CLIENT_ID }} --service-account-client-secret ${{ secrets.BATON_SERVICE_ACCOUNT_CLIENT_SECRET }} --organization-id ${{ env.VGS_ORGANIZATION_ID }} --revoke-grant ${{ env.CONNECTOR_GRANT }}
       - name: Check grant was revoked
         if: env.CONNECTOR_ENTITLEMENT != '' && env.CONNECTOR_PRINCIPAL != ''
         run: |
-           ./baton-vgs --vault ${{ env.VGS_VAULT }}
+           ./baton-vgs --vault ${{ env.VGS_VAULT }} --service-account-client-id ${{ secrets.BATON_SERVICE_ACCOUNT_CLIENT_ID }} --service-account-client-secret ${{ secrets.BATON_SERVICE_ACCOUNT_CLIENT_SECRET }} --organization-id ${{ env.VGS_ORGANIZATION_ID }}
            baton grants --entitlement ${{ env.CONNECTOR_ENTITLEMENT }} --output-format=json | jq -e ".grants | any(.principal.id.resource !=\"${{ env.CONNECTOR_PRINCIPAL }}\")"
       - name: Grant entitlement
         if: env.CONNECTOR_ENTITLEMENT != '' && env.CONNECTOR_PRINCIPAL != '' && env.CONNECTOR_PRINCIPAL_TYPE != ''
         run: | 
-          ./baton-vgs --vault ${{ env.VGS_VAULT }} 
-          ./baton-vgs --vault ${{ env.VGS_VAULT }} --grant-entitlement ${{ env.CONNECTOR_ENTITLEMENT }} --grant-principal ${{ env.CONNECTOR_PRINCIPAL }} --grant-principal-type ${{ env.CONNECTOR_PRINCIPAL_TYPE }}
+          ./baton-vgs --vault ${{ env.VGS_VAULT }} --service-account-client-id ${{ secrets.BATON_SERVICE_ACCOUNT_CLIENT_ID }} --service-account-client-secret ${{ secrets.BATON_SERVICE_ACCOUNT_CLIENT_SECRET }} --organization-id ${{ env.VGS_ORGANIZATION_ID }}
+          ./baton-vgs --vault ${{ env.VGS_VAULT }} --service-account-client-id ${{ secrets.BATON_SERVICE_ACCOUNT_CLIENT_ID }} --service-account-client-secret ${{ secrets.BATON_SERVICE_ACCOUNT_CLIENT_SECRET }} --organization-id ${{ env.VGS_ORGANIZATION_ID }} --grant-entitlement ${{ env.CONNECTOR_ENTITLEMENT }} --grant-principal ${{ env.CONNECTOR_PRINCIPAL }} --grant-principal-type ${{ env.CONNECTOR_PRINCIPAL_TYPE }}
       - name: Check grant was re-granted
         if: env.CONNECTOR_ENTITLEMENT != '' && env.CONNECTOR_PRINCIPAL != ''
         run: |
-          ./baton-vgs --vault ${{ env.VGS_VAULT }} 
+          ./baton-vgs --vault ${{ env.VGS_VAULT }} --service-account-client-id ${{ secrets.BATON_SERVICE_ACCOUNT_CLIENT_ID }} --service-account-client-secret ${{ secrets.BATON_SERVICE_ACCOUNT_CLIENT_SECRET }} --organization-id ${{ env.VGS_ORGANIZATION_ID }}
           baton grants --entitlement ${{ env.CONNECTOR_ENTITLEMENT }} --output-format=json | jq -e ".grants | any(.principal.id.resource ==\"${{ env.CONNECTOR_PRINCIPAL }}\")"
