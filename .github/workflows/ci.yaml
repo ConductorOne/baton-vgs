@@ -72,7 +72,7 @@ jobs:
         if: env.CONNECTOR_GRANT != ''
         run: |
           ./baton-vgs --vault ${{ env.VGS_VAULT }} --service-account-client-id ${{ secrets.BATON_SERVICE_ACCOUNT_CLIENT_ID }} --service-account-client-secret ${{ secrets.BATON_SERVICE_ACCOUNT_CLIENT_SECRET }} --organization-id ${{ env.VGS_ORGANIZATION_ID }}
-          ./baton-vgs --vault ${{ env.VGS_VAULT }} --revoke-grant ${{ env.CONNECTOR_GRANT }}
+          ./baton-vgs --vault ${{ env.VGS_VAULT }} --service-account-client-id ${{ secrets.BATON_SERVICE_ACCOUNT_CLIENT_ID }} --service-account-client-secret ${{ secrets.BATON_SERVICE_ACCOUNT_CLIENT_SECRET }} --organization-id ${{ env.VGS_ORGANIZATION_ID }} --revoke-grant ${{ env.CONNECTOR_GRANT }}
       - name: Check grant was revoked
         if: env.CONNECTOR_ENTITLEMENT != '' && env.CONNECTOR_PRINCIPAL != ''
         run: |
@@ -82,7 +82,7 @@ jobs:
         if: env.CONNECTOR_ENTITLEMENT != '' && env.CONNECTOR_PRINCIPAL != '' && env.CONNECTOR_PRINCIPAL_TYPE != ''
         run: | 
           ./baton-vgs --vault ${{ env.VGS_VAULT }} --service-account-client-id ${{ secrets.BATON_SERVICE_ACCOUNT_CLIENT_ID }} --service-account-client-secret ${{ secrets.BATON_SERVICE_ACCOUNT_CLIENT_SECRET }} --organization-id ${{ env.VGS_ORGANIZATION_ID }}
-          ./baton-vgs --vault ${{ env.VGS_VAULT }} --grant-entitlement ${{ env.CONNECTOR_ENTITLEMENT }} --grant-principal ${{ env.CONNECTOR_PRINCIPAL }} --grant-principal-type ${{ env.CONNECTOR_PRINCIPAL_TYPE }}
+          ./baton-vgs --vault ${{ env.VGS_VAULT }} --service-account-client-id ${{ secrets.BATON_SERVICE_ACCOUNT_CLIENT_ID }} --service-account-client-secret ${{ secrets.BATON_SERVICE_ACCOUNT_CLIENT_SECRET }} --organization-id ${{ env.VGS_ORGANIZATION_ID }} --grant-entitlement ${{ env.CONNECTOR_ENTITLEMENT }} --grant-principal ${{ env.CONNECTOR_PRINCIPAL }} --grant-principal-type ${{ env.CONNECTOR_PRINCIPAL_TYPE }}
       - name: Check grant was re-granted
         if: env.CONNECTOR_ENTITLEMENT != '' && env.CONNECTOR_PRINCIPAL != ''
         run: |
