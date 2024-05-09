@@ -203,6 +203,9 @@ func (v *VGSClient) ListOrganizations(ctx context.Context) ([]Organization, erro
 	return organizations, nil
 }
 
+// ListUsers
+// Read all organizations users. Retrieves list of all users linked to an organization. NOTE: This endpoint does not return pending invitations.
+// https://www.verygoodsecurity.com/docs/accounts/api/#tag/users/paths/~1organizations~1{organizationId}~1members/get
 func (v *VGSClient) ListUsers(ctx context.Context, orgId, vaultId string) ([]OrganizationUser, error) {
 	var (
 		users                    []OrganizationUser
@@ -251,6 +254,9 @@ func (v *VGSClient) ListUsers(ctx context.Context, orgId, vaultId string) ([]Org
 	return users, nil
 }
 
+// ListUserInvites
+// Get user invitations to an organization. Returns list of user invitations to an organization.
+// https://www.verygoodsecurity.com/docs/accounts/api/#tag/invites/paths/~1organizations~1{organizationId}~1invites/get
 func (v *VGSClient) ListUserInvites(ctx context.Context, orgId string) ([]OrganizationUser, error) {
 	var (
 		userInvites                []OrganizationUser
@@ -300,6 +306,9 @@ func (v *VGSClient) ListUserInvites(ctx context.Context, orgId string) ([]Organi
 	return userInvites, nil
 }
 
+// ListVaultUsers
+// Read all vault users. Retrieves list of all users linked to a vault.
+// https://www.verygoodsecurity.com/docs/accounts/api/#tag/users/paths/~1vaults~1{vaultIdentifier}~1members/get
 func (v *VGSClient) ListVaultUsers(ctx context.Context, vaultId string) ([]vaultUserAPI, error) {
 	var vaultUsersAPIData vaultUsersAPIData
 	if !strings.Contains(v.token.Scope, "organization-users:read") {
@@ -379,7 +388,10 @@ func (v *VGSClient) ListVaults(ctx context.Context) ([]Vault, error) {
 	return organizationVaults, nil
 }
 
-func (v *VGSClient) UpdateVault(ctx context.Context, vaultIdentifier, userId, role string) error {
+// UpdateVault
+// Update user access to vault. Requires organization-users:write scope.
+// https://www.verygoodsecurity.com/docs/accounts/api/#tag/users/paths/~1vaults~1{vaultIdentifier}~1members~1{userId}/put
+func (v *VGSClient) UpdateUserAccessVault(ctx context.Context, vaultIdentifier, userId, role string) error {
 	var (
 		body    Body
 		payload = []byte(fmt.Sprintf(`{"data":{"attributes":{"role":"%s"}}}`, role))
@@ -409,6 +421,49 @@ func (v *VGSClient) UpdateVault(ctx context.Context, vaultIdentifier, userId, ro
 		WithAcceptVndJSONHeader(),
 		WithAuthorizationBearerHeader(v.GetToken()),
 		WithJSONBodyV2(body),
+	)
+
+	if err != nil {
+		return err
+	}
+
+	resp, err := v.httpClient.Do(req)
+	if err != nil {
+		return err
+	}
+
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusNoContent {
+		return errors.New("user details not updated")
+	}
+
+	return nil
+}
+
+// RevokeUserAccessVault
+// Revoke user access to vault. Requires organization-users:write scope.
+// https://www.verygoodsecurity.com/docs/accounts/api/#tag/users/paths/~1vaults~1{vaultIdentifier}~1members~1{userId}/delete
+func (v *VGSClient) RevokeUserAccessVault(ctx context.Context, vaultIdentifier, userId string) error {
+	if !strings.Contains(v.token.Scope, "organization-users:write") {
+		return fmt.Errorf("organization-users:write scope not found")
+	}
+
+	strUrl, err := url.JoinPath(v.serviceEndpoint, "vaults", vaultIdentifier, "members", userId)
+	if err != nil {
+		return err
+	}
+
+	uri, err := url.Parse(strUrl)
+	if err != nil {
+		return err
+	}
+
+	req, err := v.httpClient.NewRequest(ctx,
+		http.MethodDelete,
+		uri,
+		WithAcceptVndJSONHeader(),
+		WithContentTypeVndHeader(),
+		WithAuthorizationBearerHeader(v.GetToken()),
 	)
 
 	if err != nil {

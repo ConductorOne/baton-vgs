@@ -128,7 +128,7 @@ func (v *vaultResourceType) Grant(ctx context.Context, principal *v2.Resource, e
 	}
 
 	role = parts[len(parts)-1]
-	err = v.client.UpdateVault(ctx,
+	err = v.client.UpdateUserAccessVault(ctx,
 		entitlement.Resource.Id.Resource,
 		principal.Id.Resource,
 		role)
@@ -145,6 +145,36 @@ func (v *vaultResourceType) Grant(ctx context.Context, principal *v2.Resource, e
 }
 
 func (v *vaultResourceType) Revoke(ctx context.Context, grant *v2.Grant) (annotations.Annotations, error) {
+	l := ctxzap.Extract(ctx)
+	principal := grant.Principal
+	entitlement := grant.Entitlement
+	if principal.Id.ResourceType != resourceTypeUser.Id {
+		l.Warn(
+			"baton-vgs: only users can be revoked role membership",
+			zap.String("principal_type", principal.Id.ResourceType),
+			zap.String("principal_id", principal.Id.Resource),
+		)
+		return nil, fmt.Errorf("baton-vgs: only users can be revoked role membership")
+	}
+
+	_, _, err := parseEntitlementID(entitlement.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	err = v.client.RevokeUserAccessVault(ctx,
+		entitlement.Resource.Id.Resource,
+		principal.Id.Resource,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	l.Warn("Role Membership has been removed.",
+		zap.String("vaultIdentifier", entitlement.Resource.Id.Resource),
+		zap.String("userId", principal.Id.Resource),
+	)
+
 	return nil, nil
 }
 
