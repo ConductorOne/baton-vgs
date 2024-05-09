@@ -49,7 +49,7 @@ func New(ctx context.Context, clientId, clientSecret, organizationId, vaultId st
 		vc  *client.VGSClient
 		err error
 	)
-	if clientSecret != "" {
+	if clientId != "" && clientSecret != "" {
 		vc, err = client.New(ctx, clientId, clientSecret, organizationId, vaultId)
 		if err != nil {
 			return nil, err
