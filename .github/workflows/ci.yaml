@@ -66,25 +66,25 @@ jobs:
       - name: Check for grant before revoking
         if: env.CONNECTOR_ENTITLEMENT != '' && env.CONNECTOR_PRINCIPAL != ''
         run: |
-          run: ./baton-vgs --vault ${{ env.VGS_VAULT }} --service-account-client-id ${{ secrets.BATON_SERVICE_ACCOUNT_CLIENT_ID }} --service-account-client-secret ${{ secrets.BATON_SERVICE_ACCOUNT_CLIENT_SECRET }} --organization-id ${{ env.VGS_ORGANIZATION_ID }}
+          ./baton-vgs --vault ${{ env.VGS_VAULT }} --service-account-client-id ${{ secrets.BATON_SERVICE_ACCOUNT_CLIENT_ID }} --service-account-client-secret ${{ secrets.BATON_SERVICE_ACCOUNT_CLIENT_SECRET }} --organization-id ${{ env.VGS_ORGANIZATION_ID }}
           baton grants --entitlement ${{ env.CONNECTOR_ENTITLEMENT }} --output-format=json | jq -e ".grants | any(.principal.id.resource ==\"${{ env.CONNECTOR_PRINCIPAL }}\")"
       - name: Revoke grants
         if: env.CONNECTOR_GRANT != ''
         run: |
-          run: ./baton-vgs --vault ${{ env.VGS_VAULT }} --service-account-client-id ${{ secrets.BATON_SERVICE_ACCOUNT_CLIENT_ID }} --service-account-client-secret ${{ secrets.BATON_SERVICE_ACCOUNT_CLIENT_SECRET }} --organization-id ${{ env.VGS_ORGANIZATION_ID }}
+          ./baton-vgs --vault ${{ env.VGS_VAULT }} --service-account-client-id ${{ secrets.BATON_SERVICE_ACCOUNT_CLIENT_ID }} --service-account-client-secret ${{ secrets.BATON_SERVICE_ACCOUNT_CLIENT_SECRET }} --organization-id ${{ env.VGS_ORGANIZATION_ID }}
           ./baton-vgs --vault ${{ env.VGS_VAULT }} --revoke-grant ${{ env.CONNECTOR_GRANT }}
       - name: Check grant was revoked
         if: env.CONNECTOR_ENTITLEMENT != '' && env.CONNECTOR_PRINCIPAL != ''
         run: |
-           run: ./baton-vgs --vault ${{ env.VGS_VAULT }} --service-account-client-id ${{ secrets.BATON_SERVICE_ACCOUNT_CLIENT_ID }} --service-account-client-secret ${{ secrets.BATON_SERVICE_ACCOUNT_CLIENT_SECRET }} --organization-id ${{ env.VGS_ORGANIZATION_ID }}
+           ./baton-vgs --vault ${{ env.VGS_VAULT }} --service-account-client-id ${{ secrets.BATON_SERVICE_ACCOUNT_CLIENT_ID }} --service-account-client-secret ${{ secrets.BATON_SERVICE_ACCOUNT_CLIENT_SECRET }} --organization-id ${{ env.VGS_ORGANIZATION_ID }}
            baton grants --entitlement ${{ env.CONNECTOR_ENTITLEMENT }} --output-format=json | jq -e ".grants | any(.principal.id.resource !=\"${{ env.CONNECTOR_PRINCIPAL }}\")"
       - name: Grant entitlement
         if: env.CONNECTOR_ENTITLEMENT != '' && env.CONNECTOR_PRINCIPAL != '' && env.CONNECTOR_PRINCIPAL_TYPE != ''
         run: | 
-          run: ./baton-vgs --vault ${{ env.VGS_VAULT }} --service-account-client-id ${{ secrets.BATON_SERVICE_ACCOUNT_CLIENT_ID }} --service-account-client-secret ${{ secrets.BATON_SERVICE_ACCOUNT_CLIENT_SECRET }} --organization-id ${{ env.VGS_ORGANIZATION_ID }}
+          ./baton-vgs --vault ${{ env.VGS_VAULT }} --service-account-client-id ${{ secrets.BATON_SERVICE_ACCOUNT_CLIENT_ID }} --service-account-client-secret ${{ secrets.BATON_SERVICE_ACCOUNT_CLIENT_SECRET }} --organization-id ${{ env.VGS_ORGANIZATION_ID }}
           ./baton-vgs --vault ${{ env.VGS_VAULT }} --grant-entitlement ${{ env.CONNECTOR_ENTITLEMENT }} --grant-principal ${{ env.CONNECTOR_PRINCIPAL }} --grant-principal-type ${{ env.CONNECTOR_PRINCIPAL_TYPE }}
       - name: Check grant was re-granted
         if: env.CONNECTOR_ENTITLEMENT != '' && env.CONNECTOR_PRINCIPAL != ''
         run: |
-          run: ./baton-vgs --vault ${{ env.VGS_VAULT }} --service-account-client-id ${{ secrets.BATON_SERVICE_ACCOUNT_CLIENT_ID }} --service-account-client-secret ${{ secrets.BATON_SERVICE_ACCOUNT_CLIENT_SECRET }} --organization-id ${{ env.VGS_ORGANIZATION_ID }}
+          ./baton-vgs --vault ${{ env.VGS_VAULT }} --service-account-client-id ${{ secrets.BATON_SERVICE_ACCOUNT_CLIENT_ID }} --service-account-client-secret ${{ secrets.BATON_SERVICE_ACCOUNT_CLIENT_SECRET }} --organization-id ${{ env.VGS_ORGANIZATION_ID }}
           baton grants --entitlement ${{ env.CONNECTOR_ENTITLEMENT }} --output-format=json | jq -e ".grants | any(.principal.id.resource ==\"${{ env.CONNECTOR_PRINCIPAL }}\")"
