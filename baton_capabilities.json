@@ -3,14 +3,51 @@
   "resourceTypeCapabilities":  [
     {
       "resourceType":  {
+        "id":  "org",
+        "displayName":  "Org",
+        "annotations":  [
+          {
+            "@type":  "type.googleapis.com/c1.connector.v2.V1Identifier",
+            "id":  "org"
+          }
+        ]
+      },
+      "capabilities":  [
+        "CAPABILITY_SYNC",
+        "CAPABILITY_PROVISION"
+      ]
+    },
+    {
+      "resourceType":  {
         "id":  "user",
         "displayName":  "User",
         "traits":  [
           "TRAIT_USER"
+        ],
+        "annotations":  [
+          {
+            "@type":  "type.googleapis.com/c1.connector.v2.SkipEntitlementsAndGrants"
+          }
         ]
       },
       "capabilities":  [
         "CAPABILITY_SYNC"
+      ]
+    },
+    {
+      "resourceType":  {
+        "id":  "vault",
+        "displayName":  "Vault",
+        "annotations":  [
+          {
+            "@type":  "type.googleapis.com/c1.connector.v2.V1Identifier",
+            "id":  "vault"
+          }
+        ]
+      },
+      "capabilities":  [
+        "CAPABILITY_SYNC",
+        "CAPABILITY_PROVISION"
       ]
     }
   ]
