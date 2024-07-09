@@ -13,45 +13,45 @@ type JWT struct {
 }
 
 type Organization struct {
-	Id           string        `json:"id"`
-	Name         string        `json:"name"`
-	State        string        `json:"state"`
-	CreatedAt    string        `json:"created_at"`
-	UpdatedAt    string        `json:"updated_at"`
-	Users        []User        `json:"users"`
-	Environments []Environment `json:"environments"`
+	Id           string        `json:"id,omitempty"`
+	Name         string        `json:"name,omitempty"`
+	State        string        `json:"state,omitempty"`
+	CreatedAt    string        `json:"created_at,omitempty"`
+	UpdatedAt    string        `json:"updated_at,omitempty"`
+	Users        []User        `json:"users,omitempty"`
+	Environments []Environment `json:"environments,omitempty"`
 }
 
 type User struct {
-	Id        string `json:"id"`
-	Name      string `json:"name"`
-	Email     string `json:"email"`
-	CreatedAt string `json:"created_at"`
-	UpdatedAt string `json:"updated_at"`
+	Id        string `json:"id,omitempty"`
+	Name      string `json:"name,omitempty"`
+	Email     string `json:"email,omitempty"`
+	CreatedAt string `json:"created_at,omitempty"`
+	UpdatedAt string `json:"updated_at,omitempty"`
 }
 
 type Environment struct {
-	Id         string `json:"id"`
-	Name       string `json:"name"`
-	Identifier string `json:"identifier"`
-	Region     string `json:"region"`
+	Id         string `json:"id,omitempty"`
+	Name       string `json:"name,omitempty"`
+	Identifier string `json:"identifier,omitempty"`
+	Region     string `json:"region,omitempty"`
 }
 
 type OrganizationUser struct {
-	Id        string `json:"id"`
-	Name      string `json:"name"`
-	Type      string `json:"type"`
-	Email     string `json:"email"`
-	CreatedAt string `json:"created_at"`
-	UpdatedAt string `json:"updated_at"`
+	Id        string `json:"id,omitempty"`
+	Name      string `json:"name,omitempty"`
+	Type      string `json:"type,omitempty"`
+	Email     string `json:"email,omitempty"`
+	CreatedAt string `json:"created_at,omitempty"`
+	UpdatedAt string `json:"updated_at,omitempty"`
 }
 
 type Vault struct {
-	Id          string `json:"id"`
-	Name        string `json:"name"`
-	Environment string `json:"env_identifier"`
-	CreatedAt   string `json:"created_at"`
-	UpdatedAt   string `json:"updated_at"`
+	Id          string `json:"id,omitempty"`
+	Name        string `json:"name,omitempty"`
+	Environment string `json:"env_identifier,omitempty"`
+	CreatedAt   string `json:"created_at,omitempty"`
+	UpdatedAt   string `json:"updated_at,omitempty"`
 }
 
 type organizationsAPIData struct {
@@ -156,17 +156,17 @@ type organizationUserAPIAttributes struct {
 	Id           string               `json:"id,omitempty"`
 	Name         string               `json:"name,omitempty"`
 	EmailAddress string               `json:"email_address,omitempty"`
-	Permissions  []string             `json:"permissions"`
-	Vaults       []vaultAPIAttributes `json:"vaults"`
-	Role         string               `json:"role"`
-	LastLogin    any                  `json:"last_login"`
-	LastIP       any                  `json:"last_ip"`
+	Permissions  []string             `json:"permissions,omitempty"`
+	Vaults       []vaultAPIAttributes `json:"vaults,omitempty"`
+	Role         string               `json:"role,omitempty"`
+	LastLogin    any                  `json:"last_login,omitempty"`
+	LastIP       any                  `json:"last_ip,omitempty"`
 }
 
 type organizationVaultAPIAttributes struct {
 	Identifier  string `json:"identifier,omitempty"`
 	Environment string `json:"environment,omitempty"`
-	Role        string `json:"role"`
+	Role        string `json:"role,omitempty"`
 	UpdatedAt   string `json:"updated_at,omitempty"`
 	Name        string `json:"name,omitempty"`
 	CreatedAt   string `json:"created_at,omitempty"`
@@ -176,10 +176,10 @@ type organizationInviteAPIAttributes struct {
 	InviteId     string               `json:"invite_id,omitempty"`
 	InviteStatus string               `json:"invite_status,omitempty"`
 	UserEmail    string               `json:"user_email,omitempty"`
-	InvitedBy    string               `json:"invited_by"`
+	InvitedBy    string               `json:"invited_by,omitempty"`
 	CreatedAt    string               `json:"created_at,omitempty"`
-	Role         string               `json:"role"`
-	Vaults       []vaultAPIAttributes `json:"vaults"`
+	Role         string               `json:"role,omitempty"`
+	Vaults       []vaultAPIAttributes `json:"vaults,omitempty"`
 }
 
 type vaultAPIAttributes struct {
@@ -195,13 +195,13 @@ type vaultAPIAttributes struct {
 }
 
 type BodyAttributes struct {
-	Role string `json:"role"`
+	Role string `json:"role,omitempty"`
 }
 
 type BodyData struct {
-	Attributes BodyAttributes `json:"attributes"`
+	Attributes BodyAttributes `json:"attributes,omitempty"`
 }
 
 type Body struct {
-	Data BodyData `json:"data"`
+	Data BodyData `json:"data,omitempty"`
 }
