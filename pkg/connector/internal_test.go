@@ -67,6 +67,10 @@ func getClientForTesting(ctx context.Context, clientId, clientSecret, orgId, vau
 }
 
 func TestClient(t *testing.T) {
+	if clientId == "" && clientSecret == "" && orgId == "" && vaultId == "" {
+		t.Skip()
+	}
+
 	cli, err := client.New(ctx, clientId, clientSecret, orgId, vaultId)
 	assert.Nil(t, err)
 	assert.NotNil(t, cli)
