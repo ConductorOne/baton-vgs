@@ -97,12 +97,6 @@ func TestVaultMembers(t *testing.T) {
 	assert.Nil(t, err)
 
 	defer resp.Body.Close()
-
-	resp, err = cli.httpClient.Do(req)
-	assert.Nil(t, err)
-
-	defer resp.Body.Close()
-
 	res, err := io.ReadAll(resp.Body)
 	assert.Nil(t, err)
 	assert.NotNil(t, res)
