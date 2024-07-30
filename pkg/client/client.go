@@ -107,7 +107,17 @@ func New(ctx context.Context, clientId, clientSecret, orgId, vaultId string) (*V
 		return nil, err
 	}
 
-	cli := uhttp.NewBaseHttpClient(httpClient)
+	// Setting up in-cache memory parameters
+	ctx = context.WithValue(ctx, uhttp.ContextKey{}, uhttp.CacheConfig{
+		LogDebug:     true,
+		CacheTTL:     int32(1000),
+		CacheMaxSize: int(1024),
+	})
+	cli, err := uhttp.NewBaseHttpClient(ctx, httpClient)
+	if err != nil {
+		return nil, err
+	}
+
 	req, err := cli.NewRequest(ctx,
 		http.MethodPost,
 		uri,

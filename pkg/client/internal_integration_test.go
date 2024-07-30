@@ -104,6 +104,19 @@ func TestVaultMembers(t *testing.T) {
 	var data any
 	err = json.Unmarshal(res, &data)
 	assert.Nil(t, err)
+
+	// -- force cache response --
+	resp1, err := cli.httpClient.Do(req)
+	assert.Nil(t, err)
+
+	defer resp1.Body.Close()
+	res1, err := io.ReadAll(resp1.Body)
+	assert.Nil(t, err)
+	assert.NotNil(t, res1)
+
+	var data1 any
+	err = json.Unmarshal(res1, &data1)
+	assert.Nil(t, err)
 }
 
 func getClientForTesting(ctx context.Context, clientId, clientSecret, orgId, vaultId string) (*VGSClient, error) {
