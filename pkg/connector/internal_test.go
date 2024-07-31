@@ -24,9 +24,12 @@ func TestUserResourceTypeList(t *testing.T) {
 		t.Skip()
 	}
 
+	cli, err := getClientForTesting(ctx)
+	assert.Nil(t, err)
+
 	user := &userResourceType{
 		resourceType: &v2.ResourceType{},
-		client:       getClientForTesting(ctx, clientId, clientSecret, orgId, vaultId),
+		client:       cli,
 	}
 	rs, _, _, err := user.List(ctx, &v2.ResourceId{}, &pagination.Token{})
 	assert.Nil(t, err)
@@ -38,9 +41,12 @@ func TestOrgResourceTypeList(t *testing.T) {
 		t.Skip()
 	}
 
+	cli, err := getClientForTesting(ctx)
+	assert.Nil(t, err)
+
 	org := &orgResourceType{
 		resourceType: &v2.ResourceType{},
-		client:       getClientForTesting(ctx, clientId, clientSecret, orgId, vaultId),
+		client:       cli,
 	}
 	rs, _, _, err := org.List(ctx, &v2.ResourceId{}, &pagination.Token{})
 	assert.Nil(t, err)
@@ -52,18 +58,30 @@ func TestVaultResourceTypeList(t *testing.T) {
 		t.Skip()
 	}
 
+	cli, err := getClientForTesting(ctx)
+	assert.Nil(t, err)
+
 	vault := &vaultResourceType{
 		resourceType: &v2.ResourceType{},
-		client:       getClientForTesting(ctx, clientId, clientSecret, orgId, vaultId),
+		client:       cli,
 	}
 	rs, _, _, err := vault.List(ctx, &v2.ResourceId{}, &pagination.Token{})
 	assert.Nil(t, err)
 	assert.NotNil(t, rs)
 }
 
-func getClientForTesting(ctx context.Context, clientId, clientSecret, orgId, vaultId string) *client.VGSClient {
-	cli, _ := client.New(ctx, clientId, clientSecret, orgId, vaultId)
-	return cli
+func getClientForTesting(ctx context.Context) (*client.VGSClient, error) {
+	cfg := client.Config{}
+	cfg.WithVaultId(vaultId).
+		WithOrganizationId(orgId).
+		WithServiceAccountClientId(clientId).
+		WithServiceAccountClientSecret(clientSecret)
+	cli, err := client.New(ctx, cfg)
+	if err != nil {
+		return nil, err
+	}
+
+	return cli, nil
 }
 
 func TestClient(t *testing.T) {
@@ -71,7 +89,7 @@ func TestClient(t *testing.T) {
 		t.Skip()
 	}
 
-	cli, err := client.New(ctx, clientId, clientSecret, orgId, vaultId)
+	cli, err := getClientForTesting(ctx)
 	assert.Nil(t, err)
 	assert.NotNil(t, cli)
 }
@@ -81,7 +99,9 @@ func TestListVaults(t *testing.T) {
 		t.Skip()
 	}
 
-	cliTest := getClientForTesting(ctx, clientId, clientSecret, orgId, vaultId)
+	cliTest, err := getClientForTesting(ctx)
+	assert.Nil(t, err)
+
 	lv, err := cliTest.ListVaults(ctx)
 	assert.Nil(t, err)
 	assert.NotNil(t, lv)
@@ -92,7 +112,9 @@ func TestListVaultUsers(t *testing.T) {
 		t.Skip()
 	}
 
-	cliTest := getClientForTesting(ctx, clientId, clientSecret, orgId, vaultId)
+	cliTest, err := getClientForTesting(ctx)
+	assert.Nil(t, err)
+
 	lvu, err := cliTest.ListVaultUsers(ctx, vaultId)
 	assert.Nil(t, err)
 	assert.NotNil(t, lvu)
@@ -103,7 +125,9 @@ func TestListUsers(t *testing.T) {
 		t.Skip()
 	}
 
-	cliTest := getClientForTesting(ctx, clientId, clientSecret, orgId, vaultId)
+	cliTest, err := getClientForTesting(ctx)
+	assert.Nil(t, err)
+
 	lu, err := cliTest.ListUsers(ctx, orgId, vaultId)
 	assert.Nil(t, err)
 	assert.NotNil(t, lu)
@@ -114,7 +138,9 @@ func TestListUserInvites(t *testing.T) {
 		t.Skip()
 	}
 
-	cliTest := getClientForTesting(ctx, clientId, clientSecret, orgId, vaultId)
+	cliTest, err := getClientForTesting(ctx)
+	assert.Nil(t, err)
+
 	lui, err := cliTest.ListUserInvites(ctx, orgId)
 	assert.Nil(t, err)
 	assert.NotNil(t, lui)
@@ -125,7 +151,9 @@ func TestListOrganizations(t *testing.T) {
 		t.Skip()
 	}
 
-	cliTest := getClientForTesting(ctx, clientId, clientSecret, orgId, vaultId)
+	cliTest, err := getClientForTesting(ctx)
+	assert.Nil(t, err)
+
 	lo, err := cliTest.ListOrganizations(ctx)
 	assert.Nil(t, err)
 	assert.NotNil(t, lo)
@@ -136,8 +164,10 @@ func TestUpdateVault(t *testing.T) {
 		t.Skip()
 	}
 
-	cliTest := getClientForTesting(ctx, clientId, clientSecret, orgId, vaultId)
-	err := cliTest.UpdateUserAccessVault(ctx, vaultId, "ID9hRKLhcc6RWBvaHQ7L1Uan", "write")
+	cliTest, err := getClientForTesting(ctx)
+	assert.Nil(t, err)
+
+	err = cliTest.UpdateUserAccessVault(ctx, vaultId, "ID9hRKLhcc6RWBvaHQ7L1Uan", "write")
 	assert.Nil(t, err)
 }
 
@@ -146,7 +176,9 @@ func TestRevokeVault(t *testing.T) {
 		t.Skip()
 	}
 
-	cliTest := getClientForTesting(ctx, clientId, clientSecret, orgId, vaultId)
-	err := cliTest.RevokeUserAccessVault(ctx, vaultId, "IDjSP9BVbJ3RnPr2FonGxXp5")
+	cliTest, err := getClientForTesting(ctx)
+	assert.Nil(t, err)
+
+	err = cliTest.RevokeUserAccessVault(ctx, vaultId, "IDjSP9BVbJ3RnPr2FonGxXp5")
 	assert.Nil(t, err)
 }

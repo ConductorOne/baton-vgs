@@ -16,12 +16,68 @@ import (
 	"github.com/grpc-ecosystem/go-grpc-middleware/logging/zap/ctxzap"
 )
 
-type VGSClient struct {
-	httpClient      *uhttp.BaseHttpClient
-	token           *JWT
-	serviceEndpoint string
-	organizationId  string
-	vaultId         string
+type (
+	VGSClient struct {
+		httpClient      *uhttp.BaseHttpClient
+		token           *JWT
+		serviceEndpoint string
+		organizationId  string
+		vaultId         string
+	}
+
+	Config struct {
+		serviceAccountClientId     string
+		serviceAccountClientSecret string
+		organizationId             string
+		vaultId                    string
+	}
+)
+
+const (
+	ServiceAccountClientIdName     = "service-account-client-id"
+	ServiceAccountClientSecretName = "service-account-client-secret"
+	OrganizationId                 = "organization-id"
+	VaultId                        = "vault"
+	serviceAccountClient           = "serviceAccountClientId"
+	serviceAccountClientSecret     = "serviceAccountClientSecret"
+	organization                   = "organizationId"
+	vault                          = "vaultId"
+	empty                          = ""
+)
+
+func (c *Config) WithServiceAccountClientId(sAccId string) *Config {
+	c.serviceAccountClientId = sAccId
+	return c
+}
+
+func (c *Config) WithServiceAccountClientSecret(sAccSec string) *Config {
+	c.serviceAccountClientSecret = sAccSec
+	return c
+}
+
+func (c *Config) WithOrganizationId(orgId string) *Config {
+	c.organizationId = orgId
+	return c
+}
+
+func (c *Config) WithVaultId(vId string) *Config {
+	c.vaultId = vId
+	return c
+}
+
+func (c *Config) getFieldValue(fieldName string) string {
+	switch fieldName {
+	case serviceAccountClient:
+		return c.serviceAccountClientId
+	case serviceAccountClientSecret:
+		return c.serviceAccountClientSecret
+	case organization:
+		return c.organizationId
+	case vault:
+		return c.vaultId
+	}
+
+	return empty
 }
 
 func WithBody(body string) uhttp.RequestOption {
@@ -95,8 +151,14 @@ func WithSetBasicAuthHeader(username, password string) uhttp.RequestOption {
 	return uhttp.WithHeader("Authorization", "Basic "+basicAuth(username, password))
 }
 
-func New(ctx context.Context, clientId, clientSecret, orgId, vaultId string) (*VGSClient, error) {
-	var jwt = &JWT{}
+func New(ctx context.Context, cfg Config) (*VGSClient, error) {
+	var (
+		jwt          = &JWT{}
+		clientId     = cfg.getFieldValue(serviceAccountClient)
+		clientSecret = cfg.getFieldValue(serviceAccountClientSecret)
+		orgId        = cfg.getFieldValue(organization)
+		vaultId      = cfg.getFieldValue(vault)
+	)
 	uri, err := url.Parse("https://auth.verygoodsecurity.com/auth/realms/vgs/protocol/openid-connect/token")
 	if err != nil {
 		return nil, err
@@ -107,7 +169,7 @@ func New(ctx context.Context, clientId, clientSecret, orgId, vaultId string) (*V
 		return nil, err
 	}
 
-	// Setting up in-cache memory parameters
+	// Setting up in-cache memory parameters, otherwise it takes default values
 	ctx = context.WithValue(ctx, uhttp.ContextKey{}, uhttp.CacheConfig{
 		LogDebug:     true,
 		CacheTTL:     int32(1000),

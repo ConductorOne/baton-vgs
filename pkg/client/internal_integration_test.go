@@ -18,6 +18,12 @@ var (
 	clientSecret, _ = os.LookupEnv("BATON_SERVICE_ACCOUNT_CLIENT_SECRET")
 	vaultId, _      = os.LookupEnv("BATON_VAULT")
 	orgId, _        = os.LookupEnv("BATON_ORGANIZATION_ID")
+	cfg             = Config{
+		serviceAccountClientId:     clientId,
+		serviceAccountClientSecret: clientSecret,
+		organizationId:             orgId,
+		vaultId:                    vaultId,
+	}
 )
 
 const (
@@ -48,7 +54,13 @@ func TestOrganizationResources(t *testing.T) {
 		},
 	}
 
-	cli, err := getClientForTesting(ctx, clientId, clientSecret, orgId, vaultId)
+	cfg := Config{
+		serviceAccountClientId:     clientId,
+		serviceAccountClientSecret: clientSecret,
+		organizationId:             orgId,
+		vaultId:                    vaultId,
+	}
+	cli, err := getClientForTesting(ctx, cfg)
 	assert.Nil(t, err)
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
@@ -81,7 +93,7 @@ func TestVaultMembers(t *testing.T) {
 		t.Skip()
 	}
 
-	cli, err := getClientForTesting(ctx, clientId, clientSecret, orgId, vaultId)
+	cli, err := getClientForTesting(ctx, cfg)
 	assert.Nil(t, err)
 
 	endpointUrl, err := url.JoinPath(baseUrl, "vaults", vaultId, "members")
@@ -119,8 +131,8 @@ func TestVaultMembers(t *testing.T) {
 	assert.Nil(t, err)
 }
 
-func getClientForTesting(ctx context.Context, clientId, clientSecret, orgId, vaultId string) (*VGSClient, error) {
-	cli, err := New(ctx, clientId, clientSecret, orgId, vaultId)
+func getClientForTesting(ctx context.Context, cfg Config) (*VGSClient, error) {
+	cli, err := New(ctx, cfg)
 	return cli, err
 }
 
@@ -129,7 +141,7 @@ func TestVaults(t *testing.T) {
 		t.Skip()
 	}
 
-	cli, err := getClientForTesting(ctx, clientId, clientSecret, orgId, vaultId)
+	cli, err := getClientForTesting(ctx, cfg)
 	assert.Nil(t, err)
 
 	endpointUrl, err := url.JoinPath(baseUrl, "vaults")
