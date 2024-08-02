@@ -169,17 +169,7 @@ func New(ctx context.Context, cfg Config) (*VGSClient, error) {
 		return nil, err
 	}
 
-	// Setting up in-cache memory parameters, otherwise it takes default values
-	ctx = context.WithValue(ctx, uhttp.ContextKey{}, uhttp.CacheConfig{
-		LogDebug:     true,
-		CacheTTL:     int32(1000),
-		CacheMaxSize: int(1024),
-	})
-	cli, err := uhttp.NewBaseHttpClient(ctx, httpClient)
-	if err != nil {
-		return nil, err
-	}
-
+	cli := uhttp.NewBaseHttpClient(httpClient)
 	req, err := cli.NewRequest(ctx,
 		http.MethodPost,
 		uri,
