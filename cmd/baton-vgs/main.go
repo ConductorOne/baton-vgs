@@ -29,10 +29,7 @@ var (
 	ServiceAccountClientSecret = field.StringField(client.ServiceAccountClientSecretName, field.WithRequired(true), field.WithDescription("The VGS client secret."))
 	OrganizationId             = field.StringField(client.OrganizationId, field.WithRequired(true), field.WithDescription("The VGS organization id."))
 	Vault                      = field.StringField(client.VaultId, field.WithRequired(true), field.WithDescription("The VGS vault id."))
-	CacheDisabled              = field.StringField(batonCacheDisable, field.WithRequired(false), field.WithDescription("Verbose mode shows information about new memory allocation."))
-	CacheTTL                   = field.StringField(batonCacheTTL, field.WithRequired(false), field.WithDescription("Time after which entry can be evicted."))
-	CacheMaxSize               = field.StringField(batonCacheMaxSize, field.WithRequired(false), field.WithDescription("It is a limit for BytesQueue size in MB."))
-	configurationFields        = []field.SchemaField{Vault, ServiceAccountClientId, ServiceAccountClientSecret, OrganizationId, CacheDisabled, CacheTTL, CacheMaxSize}
+	configurationFields        = []field.SchemaField{Vault, ServiceAccountClientId, ServiceAccountClientSecret, OrganizationId}
 )
 
 func main() {
