@@ -17,11 +17,8 @@ import (
 )
 
 const (
-	version           = "dev"
-	connectorName     = "baton-vgs"
-	batonCacheDisable = "cache-disable"
-	batonCacheTTL     = "cache-ttl"
-	batonCacheMaxSize = "cache-max-size"
+	version       = "dev"
+	connectorName = "baton-vgs"
 )
 
 var (
