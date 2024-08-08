@@ -18,6 +18,12 @@ var (
 	clientSecret, _ = os.LookupEnv("BATON_SERVICE_ACCOUNT_CLIENT_SECRET")
 	vaultId, _      = os.LookupEnv("BATON_VAULT")
 	orgId, _        = os.LookupEnv("BATON_ORGANIZATION_ID")
+	cfg             = Config{
+		serviceAccountClientId:     clientId,
+		serviceAccountClientSecret: clientSecret,
+		organizationId:             orgId,
+		vaultId:                    vaultId,
+	}
 )
 
 const (
@@ -48,7 +54,13 @@ func TestOrganizationResources(t *testing.T) {
 		},
 	}
 
-	cli, err := getClientForTesting(ctx, clientId, clientSecret, orgId, vaultId)
+	cfg := Config{
+		serviceAccountClientId:     clientId,
+		serviceAccountClientSecret: clientSecret,
+		organizationId:             orgId,
+		vaultId:                    vaultId,
+	}
+	cli, err := getClientForTesting(ctx, cfg)
 	assert.Nil(t, err)
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
@@ -81,7 +93,7 @@ func TestVaultMembers(t *testing.T) {
 		t.Skip()
 	}
 
-	cli, err := getClientForTesting(ctx, clientId, clientSecret, orgId, vaultId)
+	cli, err := getClientForTesting(ctx, cfg)
 	assert.Nil(t, err)
 
 	endpointUrl, err := url.JoinPath(baseUrl, "vaults", vaultId, "members")
@@ -104,10 +116,23 @@ func TestVaultMembers(t *testing.T) {
 	var data any
 	err = json.Unmarshal(res, &data)
 	assert.Nil(t, err)
+
+	// -- force cache response --
+	resp1, err := cli.httpClient.Do(req)
+	assert.Nil(t, err)
+
+	defer resp1.Body.Close()
+	res1, err := io.ReadAll(resp1.Body)
+	assert.Nil(t, err)
+	assert.NotNil(t, res1)
+
+	var data1 any
+	err = json.Unmarshal(res1, &data1)
+	assert.Nil(t, err)
 }
 
-func getClientForTesting(ctx context.Context, clientId, clientSecret, orgId, vaultId string) (*VGSClient, error) {
-	cli, err := New(ctx, clientId, clientSecret, orgId, vaultId)
+func getClientForTesting(ctx context.Context, cfg Config) (*VGSClient, error) {
+	cli, err := New(ctx, cfg)
 	return cli, err
 }
 
@@ -116,7 +141,7 @@ func TestVaults(t *testing.T) {
 		t.Skip()
 	}
 
-	cli, err := getClientForTesting(ctx, clientId, clientSecret, orgId, vaultId)
+	cli, err := getClientForTesting(ctx, cfg)
 	assert.Nil(t, err)
 
 	endpointUrl, err := url.JoinPath(baseUrl, "vaults")
